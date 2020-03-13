@@ -20,7 +20,7 @@
 #include <xnnpack/compute.h>
 
 
-void xnn_compute_ggemm(
+void xnn_compute_grouped_gemm(
     const struct gemm_context context[restrict static 1],
     size_t group_index,
     size_t mr_block_start,
@@ -85,7 +85,7 @@ void xnn_compute_spmm(
       &context->params);
 }
 
-void xnn_compute_gigemm(
+void xnn_compute_grouped_igemm(
     const struct igemm_context context[restrict static 1],
     size_t batch_index,
     size_t group_index,
@@ -138,7 +138,82 @@ void xnn_compute_igemm(
       &context->params);
 }
 
-void xnn_compute_gsubconv2d(
+void xnn_compute_grouped_subgemm2d(
+      const struct subgemm_context context[restrict static 1],
+      size_t batch_index,
+      size_t group_index,
+      size_t subkernel_index,
+      size_t slice_y,
+      size_t slice_x_start,
+      size_t nc_block_start,
+      size_t slice_x_max,
+      size_t nc_block_size)
+{
+  const struct subconvolution_params* subconvolution_params = &context->subconvolution_params[subkernel_index];
+
+  if XNN_UNLIKELY(slice_y >= subconvolution_params->slice_height) {
+    return;
+  }
+
+  const size_t slice_width = subconvolution_params->slice_width;
+  if XNN_UNLIKELY(slice_x_start >= slice_width) {
+    return;
+  }
+  const size_t slice_x_size = min(slice_x_max, slice_width - slice_x_start);
+
+  const size_t ax_stride = context->ax_stride;
+  const size_t cx_stride = context->cx_stride;
+  context->ukernel(
+      slice_x_size,
+      nc_block_size,
+      context->kc,
+      (const void*) ((uintptr_t) context->a + group_index * context->ga_stride + slice_y * context->ay_stride + slice_x_start * ax_stride + batch_index * context->ba_stride),
+      ax_stride,
+      (const void*) ((uintptr_t) subconvolution_params->weights + nc_block_start * subconvolution_params->w_stride + group_index * context->gw_stride),
+      (void*) ((uintptr_t) subconvolution_params->output + group_index * context->gc_stride + slice_y * context->cy_stride + slice_x_start * cx_stride + batch_index * context->bc_stride + (nc_block_start << context->log2_csize)),
+      cx_stride,
+      context->cn_stride,
+      &context->params);
+}
+
+void xnn_compute_subgemm2d(
+      const struct subgemm_context context[restrict static 1],
+      size_t batch_index,
+      size_t subkernel_index,
+      size_t slice_y,
+      size_t slice_x_start,
+      size_t nc_block_start,
+      size_t slice_x_max,
+      size_t nc_block_size)
+{
+  const struct subconvolution_params* subconvolution_params = &context->subconvolution_params[subkernel_index];
+
+  if XNN_UNLIKELY(slice_y >= subconvolution_params->slice_height) {
+    return;
+  }
+
+  const size_t slice_width = subconvolution_params->slice_width;
+  if XNN_UNLIKELY(slice_x_start >= slice_width) {
+    return;
+  }
+  const size_t slice_x_size = min(slice_x_max, slice_width - slice_x_start);
+
+  const size_t ax_stride = context->ax_stride;
+  const size_t cx_stride = context->cx_stride;
+  context->ukernel(
+      slice_x_size,
+      nc_block_size,
+      context->kc,
+      (const void*) ((uintptr_t) context->a + slice_y * context->ay_stride + slice_x_start * ax_stride + batch_index * context->ba_stride),
+      ax_stride,
+      (const void*) ((uintptr_t) subconvolution_params->weights + nc_block_start * subconvolution_params->w_stride),
+      (void*) ((uintptr_t) subconvolution_params->output + slice_y * context->cy_stride + slice_x_start * cx_stride + batch_index * context->bc_stride + (nc_block_start << context->log2_csize)),
+      cx_stride,
+      context->cn_stride,
+      &context->params);
+}
+
+void xnn_compute_grouped_subconv2d(
       const struct subconv_context context[restrict static 1],
       size_t batch_index,
       size_t group_index,
@@ -357,14 +432,14 @@ void xnn_compute_average_pooling_unipass(
     size_t output_y)
 {
   const void** indirect_input =
-    (const void**) ((uintptr_t) context->indirect_input +
-      batch_index * context->indirect_input_batch_stride + output_y * context->indirect_input_height_stride);
-  void* output =
-    (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride + output_y * context->output_height_stride);
+    (const void**) ((uintptr_t) context->indirect_input + output_y * context->indirect_input_height_stride);
+  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;
+  void* output = (void*) ((uintptr_t) context->output +
+    batch_index * context->output_batch_stride + output_y * context->output_height_stride);
 
   context->unipass_ukernel(
     context->output_width, context->pooling_size, context->channels,
-    indirect_input, context->zero, output,
+    indirect_input, input_offset, context->zero, output,
     context->input_increment, context->output_increment,
     &context->params);
 }
@@ -375,15 +450,15 @@ void xnn_compute_average_pooling_multipass(
     size_t output_y)
 {
   const void** indirect_input =
-    (const void**) ((uintptr_t) context->indirect_input +
-      batch_index * context->indirect_input_batch_stride + output_y * context->indirect_input_height_stride);
-  void* output =
-    (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride + output_y * context->output_height_stride);
+    (const void**) ((uintptr_t) context->indirect_input + output_y * context->indirect_input_height_stride);
+  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;
+  void* output = (void*) ((uintptr_t) context->output +
+    batch_index * context->output_batch_stride + output_y * context->output_height_stride);
   XNN_ALIGN(16) int32_t multipass_buffer[context->channels + XNN_EXTRA_BYTES / sizeof(uint8_t)];
 
   context->multipass_ukernel(
     context->output_width, context->pooling_size, context->channels,
-    indirect_input, context->zero, multipass_buffer, output,
+    indirect_input, input_offset, context->zero, multipass_buffer, output,
     context->input_increment, context->output_increment,
     &context->params);
 }
@@ -394,16 +469,16 @@ void xnn_compute_pixelwise_average_pooling_unipass(
     size_t output_y)
 {
   const void** indirect_input =
-    (const void**) ((uintptr_t) context->indirect_input +
-      batch_index * context->indirect_input_batch_stride + output_y * context->indirect_input_height_stride);
+    (const void**) ((uintptr_t) context->indirect_input + output_y * context->indirect_input_height_stride);
+  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;
   const void* pixelwise_buffer =
     (const void*) ((uintptr_t) context->pixelwise_buffer + output_y * context->pixelwise_buffer_height_stride);
-  void* output =
-    (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride + output_y * context->output_height_stride);
+  void* output = (void*) ((uintptr_t) context->output +
+    batch_index * context->output_batch_stride + output_y * context->output_height_stride);
 
   context->unipass_ukernel(
     context->output_width, context->pooling_size, context->channels,
-    indirect_input, context->zero, pixelwise_buffer, output,
+    indirect_input, input_offset, context->zero, pixelwise_buffer, output,
     context->input_increment, context->output_increment,
     &context->params);
 }
@@ -414,17 +489,17 @@ void xnn_compute_pixelwise_average_pooling_multipass(
     size_t output_y)
 {
   const void** indirect_input =
-    (const void**) ((uintptr_t) context->indirect_input +
-      batch_index * context->indirect_input_batch_stride + output_y * context->indirect_input_height_stride);
+    (const void**) ((uintptr_t) context->indirect_input + output_y * context->indirect_input_height_stride);
+  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;
   const void* pixelwise_buffer =
     (const void*) ((uintptr_t) context->pixelwise_buffer + output_y * context->pixelwise_buffer_height_stride);
-  void* output =
-    (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride + output_y * context->output_height_stride);
+  void* output = (void*) ((uintptr_t) context->output +
+    batch_index * context->output_batch_stride + output_y * context->output_height_stride);
   XNN_ALIGN(16) int32_t multipass_buffer[context->channels + XNN_EXTRA_BYTES / sizeof(uint8_t)];
 
   context->multipass_ukernel(
     context->output_width, context->pooling_size, context->channels,
-    indirect_input, context->zero, pixelwise_buffer, multipass_buffer, output,
+    indirect_input, input_offset, context->zero, pixelwise_buffer, multipass_buffer, output,
     context->input_increment, context->output_increment,
     &context->params);
 }
@@ -517,7 +592,7 @@ void xnn_compute_prelu(
   const void* x = (const void*) ((uintptr_t) context->x + x_stride * batch_start);
   void* y = (void*) ((uintptr_t) context->y + y_stride * batch_start);
 
-  context->ukernel(batch_range, context->n, x, x_stride, context->w, y, y_stride, &context->params);
+  context->ukernel(batch_range, context->n, x, x_stride, context->w, y, y_stride);
 }
 
 void xnn_compute_channel_pad(
