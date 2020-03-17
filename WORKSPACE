@@ -44,10 +44,10 @@ http_archive(
 # pthreadpool library, used for parallelization
 http_archive(
     name = "pthreadpool",
-    strip_prefix = "pthreadpool-7ad026703b3109907ad124025918da15cfd3f100",
-    sha256 = "96eb4256fc438b7b8cab40541d383efaf546fae7bad380c24ea601c326c5f685",
+    strip_prefix = "pthreadpool-ebd50d0cfa3664d454ffdf246fcd228c3b370a11",
+    sha256 = "ca4fc774cf2339cb739bba827de8ed4ccbd450c4608e05329e974153448aaf56",
     urls = [
-        "https://github.com/Maratyszcza/pthreadpool/archive/7ad026703b3109907ad124025918da15cfd3f100.tar.gz",
+        "https://github.com/Maratyszcza/pthreadpool/archive/ebd50d0cfa3664d454ffdf246fcd228c3b370a11.tar.gz",
     ],
     build_file = "@//third_party:pthreadpool.BUILD",
 )
@@ -66,10 +66,10 @@ http_archive(
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
     name = "cpuinfo",
-    strip_prefix = "cpuinfo-d5e37adf1406cf899d7d9ec1d317c47506ccb970",
-    sha256 = "3f2dc1970f397a0e59db72f9fca6ff144b216895c1d606f6c94a507c1e53a025",
+    strip_prefix = "cpuinfo-d6c0f915ee737f961915c9d17f1679b6777af207",
+    sha256 = "146fc61c3cf63d7d88db963876929a4d373f621fb65568b895efa0857f467770",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/d5e37adf1406cf899d7d9ec1d317c47506ccb970.tar.gz",
+        "https://github.com/pytorch/cpuinfo/archive/d6c0f915ee737f961915c9d17f1679b6777af207.tar.gz",
     ],
     build_file = "@//third_party:cpuinfo.BUILD",
     patches = ["@//third_party:cpuinfo.patch"],
@@ -78,10 +78,10 @@ http_archive(
 # psimd library, used for fallback 128-bit SIMD micro-kernels
 http_archive(
     name = "psimd",
-    strip_prefix = "psimd-10b4ffc6ea9e2e11668f86969586f88bc82aaefa",
-    sha256 = "1fefd66702cb2eb3462b962f33d4fb23d59a55d5889ee6372469d286c4512df4",
+    strip_prefix = "psimd-88882f601f8179e1987b7e7cf4a8012c9080ad44",
+    sha256 = "c621f9bb1ff9ab8f0fa4a04f3239d13b345a6e865318d7b464aa80531a1abb2c",
     urls = [
-        "https://github.com/Maratyszcza/psimd/archive/10b4ffc6ea9e2e11668f86969586f88bc82aaefa.tar.gz",
+        "https://github.com/Maratyszcza/psimd/archive/88882f601f8179e1987b7e7cf4a8012c9080ad44.tar.gz",
     ],
     build_file = "@//third_party:psimd.BUILD",
 )

@@ -68,12 +68,12 @@ The table below presents **multi-threaded** performance of XNNPACK library on th
 
 | Model              | RPi 2 (BCM2836), ms | RPi 3+ (BCM2837B0), ms | RPi 4 (BCM2711), ms |
 | ------------------ | :-----------------: | :--------------------: | :-----------------: |
-| MobileNet v1 1.0X  |         380         |          115           |          76         |
-| MobileNet v2 1.0X  |         217         |           80           |          45         |
-| MobileNet v3 Large |         180         |           67           |          41         |
-| MobileNet v3 Small |          57         |           23           |          15         |
+| MobileNet v1 1.0X  |         341         |          115           |          75         |
+| MobileNet v2 1.0X  |         197         |           79           |          44         |
+| MobileNet v3 Large |         165         |           67           |          41         |
+| MobileNet v3 Small |          53         |           23           |          14         |
 
-Benchmarked on January 9, 2020 with `end2end-bench --benchmark_min_time=5` on a Raspbian Buster build with CMake (`./scripts/build-local.sh`) and neural network models with randomized weights and inputs.
+Benchmarked on February 12, 2020 with `end2end-bench --benchmark_min_time=5` on a Raspbian Buster build with CMake (`./scripts/build-local.sh`) and neural network models with randomized weights and inputs.
 
 ## Publications
 
@@ -83,6 +83,15 @@ Benchmarked on January 9, 2020 with `end2end-bench --benchmark_min_time=5` on a 
   models](https://github.com/google-research/google-research/tree/master/fastconvnets).
 - Marat Dukhan, Artsiom Ablavatski "The Two-Pass Softmax Algorithm".
   [Paper on ArXiv](https://arxiv.org/abs/2001.04438).
+
+## Ecosystem
+
+### Machine Learning Frameworks
+
+- [TensorFlow.js WebAssembly backend](https://github.com/tensorflow/tfjs/tree/master/tfjs-backend-wasm).
+- TensorFlow Lite through the [XNNPACK delegate](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/delegates/xnnpack).
+- [MediaPipe for Web](https://developers.googleblog.com/2020/01/mediapipe-on-web.html).
+- [PyTorch](https://github.com/pytorch/pytorch/tree/master/aten/src/ATen/native/xnnpack).
 
 ## Acknowledgements
 
