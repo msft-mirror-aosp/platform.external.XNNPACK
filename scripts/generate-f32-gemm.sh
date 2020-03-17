@@ -69,6 +69,9 @@ tools/xngen src/f32-gemm/5x8-aarch64-neonfma-cortex-a75.S.in  -D INC=1 -D PREFET
 tools/xngen src/f32-gemm/6x8-aarch64-neonfma-cortex-a53.S.in  -D INC=0 -o src/f32-gemm/gen/6x8-aarch64-neonfma-cortex-a53.S
 tools/xngen src/f32-gemm/6x8-aarch64-neonfma-cortex-a53.S.in  -D INC=1 -o src/f32-gemm/gen-inc/6x8-aarch64-neonfma-cortex-a53.S
 
+tools/xngen src/f32-gemm/6x8-aarch64-neonfma-cortex-a55.S.in  -D INC=0 -o src/f32-gemm/gen/6x8-aarch64-neonfma-cortex-a55.S
+tools/xngen src/f32-gemm/6x8-aarch64-neonfma-cortex-a55.S.in  -D INC=1 -o src/f32-gemm/gen-inc/6x8-aarch64-neonfma-cortex-a55.S
+
 tools/xngen src/f32-gemm/6x8-aarch64-neonfma-cortex-a73.S.in  -D INC=0 -o src/f32-gemm/gen/6x8-aarch64-neonfma-cortex-a73.S
 tools/xngen src/f32-gemm/6x8-aarch64-neonfma-cortex-a73.S.in  -D INC=1 -o src/f32-gemm/gen-inc/6x8-aarch64-neonfma-cortex-a73.S
 
@@ -186,6 +189,8 @@ tools/xngen src/f32-gemm/psimd-s4.c.in -D MR=4 -D NR=8 -D INC=1 -o src/f32-gemm/
 
 tools/xngen src/f32-gemm/psimd-s4.c.in -D MR=6 -D NR=8 -D INC=0 -o src/f32-gemm/gen/6x8s4-psimd.c
 tools/xngen src/f32-gemm/psimd-s4.c.in -D MR=6 -D NR=8 -D INC=1 -o src/f32-gemm/gen-inc/6x8s4-psimd.c
+### MRx2 micro-kernels
+tools/xngen src/f32-gemm/MRx2c4-psimd.c.in -D MR=4 -D NR=2 -o src/f32-gemm/gen/4x2c4-psimd.c
 
 ################################### x86 SSE ###################################
 ### LOAD1+BROADCAST micro-kernels
@@ -206,6 +211,8 @@ tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=1 -D NR=8 -D INC=1 -o src/f32-ge
 
 tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=4 -D NR=8 -D INC=0 -o src/f32-gemm/gen/4x8s4-sse.c
 tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=4 -D NR=8 -D INC=1 -o src/f32-gemm/gen-inc/4x8s4-sse.c
+### MRx2 micro-kernels
+tools/xngen src/f32-gemm/MRx2c4-sse.c.in -D MR=4 -D NR=2 -o src/f32-gemm/gen/4x2c4-sse.c
 
 ################################### x86 AVX ###################################
 ### AVX+BROADCAST micro-kernels

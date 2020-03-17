@@ -14,16 +14,16 @@
 // void xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
-//     size_t kc,                            r2 -> r5 -> sp + 64
-//     size_t ks,                            r3 -> sp + 68 -> r14
-//     const float**restrict a,  sp + 108 -> r2
-//     const void*restrict w,    sp + 112 -> r9
-//     uint8_t*restrict c,       sp + 116 -> r11
-//     size_t cm_stride,         sp + 120 -> (r6)
-//     size_t cn_stride,         sp + 124 -> (r7)
-//     size_t a_offset,          sp + 128 -> (r5)
-//     const float* zero,        sp + 132 -> (r7)
-//     output_params*params,     sp + 136 -> (r5)
+//     size_t kc,                            r2 -> r5 -> sp + 68
+//     size_t ks,                            r3 -> sp + 72 -> r14
+//     const float**restrict a,  sp + 112 -> r2
+//     const void*restrict w,    sp + 116 -> r9
+//     uint8_t*restrict c,       sp + 120 -> r11
+//     size_t cm_stride,         sp + 124 -> (r6)
+//     size_t cn_stride,         sp + 128 -> (r7)
+//     size_t a_offset,          sp + 132 -> (r5)
+//     const float* zero,        sp + 136 -> (r7)
+//     output_params*params,     sp + 140 -> (r5)
 
 // inner loop registers
 
@@ -48,16 +48,17 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75
         .arch armv7-a
         .fpu neon
 #endif
-        // Push 108 bytes
+        // Push 112 bytes
         // r2 will be reloaded in outer loop.  r3 is ks
         PUSH   {r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r14}  // +44
-        VPUSH  {d8-d15}                                         // +64 = 108
+        SUB    sp, sp, 4                                        // 4
+        VPUSH  {d8-d15}                                         // +64 = 112
 
-        LDR         r2, [sp, 108]    // a
-        LDR         r9, [sp, 112]    // w
-        LDR        r11, [sp, 116]    // c
-        LDR         r6, [sp, 120]    // cm_stride
-        LDR        r14, [sp, 68]     // p = ks
+        LDR        r11, [sp, 120]    // c
+        LDR         r6, [sp, 124]    // cm_stride
+        LDR         r2, [sp, 112]    // a
+        LDR         r9, [sp, 116]    // w
+        MOV        r14, r3           // p = ks
 
         // Clamp C pointers
         CMP    r0, 2                 // if mr >= 2
@@ -91,8 +92,8 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75
         ADD         r2, r2, 16
 
         // Add a_offset
-        LDR         r5, [sp, 128]    // a_offset
-        LDR         r7, [sp, 132]    // zero
+        LDR         r5, [sp, 132]    // a_offset
+        LDR         r7, [sp, 136]    // zero
         CMP         r3,  r7          // if a0 == zero
         ADD         r3,  r3, r5      // a0 += a_offset
         MOVEQ       r3,  r7          //   a0 = zero, else += a0 + a_offset
@@ -104,12 +105,12 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75
         MOVEQ      r10,  r7          //   a2 = zero, else += a2 + a_offset
         CMP         r0,  r7          // if a3 == zero
         ADD         r0,  r0, r5      // a3 += a_offset
-        LDR         r5, [sp, 64]     // kc
+        LDR         r5, [sp, 68]     // kc
         MOVEQ       r0,  r7          //   a3 = zero, else += a3 + a_offset
 
 
         SUBS        r5, r5, 16       // kc - 16
-        BLO         4f               // less than 4 channels?
+        BLO         5f               // less than 4 channels?
 
         // Prologue
         VLD1.32    {d0}, [r3]!       // A0
@@ -216,21 +217,20 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75
         VMLA.F32    q13, q7, d6[1]
         VMLA.F32    q15, q7, d7[1]
 
-4:
         // Is there a remainder?- 1 to 3 floats of A (4, 8 or 12 bytes)
         TST         r5, 12
-        BNE         7f
+        BNE         5f
 
         .p2align 3
-5:
+4:
         # ks loop
         SUBS r14, r14, 16  // ks -= MR * sizeof(void*)
-        BNE 1b
+        BHI 1b
 
         // Load params pointer
-        LDR          r5, [sp, 136]   // clamping_params
-        LDR          r7, [sp, 124]   // cn_stride
-        LDR         r14, [sp, 68]    // p = ks
+        LDR          r5, [sp, 140]   // clamping_params
+        LDR          r7, [sp, 128]   // cn_stride
+        LDR         r14, [sp, 72]    // p = ks
 
         // Load clamping_params values
         VLD1.32     {d4[],d5[]}, [r5]!
@@ -257,23 +257,22 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75
 
         // Store full 4 x 8
         BLO         10f
-        VST1.32     {d28-d31}, [r6], r7
-        VST1.32     {d24-d27}, [r8], r7
-        VST1.32     {d20-d23}, [r4], r7
+        VST1.32     {d28-d31},  [r6], r7
+        VST1.32     {d24-d27},  [r8], r7
+        VST1.32     {d20-d23},  [r4], r7
         VST1.32     {d16-d19}, [r11], r7
         SUB         r2, r2, r14    // a -= ks
         BHI         0b
 
-6:
         VPOP        {d8-d15}
-        ADD         sp, sp, 8  // skip r2, r3
+        ADD         sp, sp, 12  // skip pad, r2, r3
         POP         {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
         .p2align 3
-7:
+5:
         // Is there a remainder?- 2 floats of A (8 bytes)
         TST         r5, 8
-        BEQ         8f
+        BEQ         6f
 
         // Remainder - 2 floats of A (8 bytes)
         VLD1.32    {d0}, [r3]!       // A0
@@ -299,12 +298,12 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75
         VMLA.F32    q13, q7, d2[1]
         VMLA.F32    q14, q6, d3[1]
         VMLA.F32    q15, q7, d3[1]
-8:
+
         // Is there a remainder?- 1 floats of A (4 bytes)
         TST         r5, 4
-        BEQ         5b
+        BEQ         4b
 
-9:
+6:
         // Remainder- 1 floats of A (4 bytes)
         VLDM        r3!, {s0}       // A0
         VLDM        r9!, {d8-d11}   // B0
@@ -319,7 +318,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75
         VMLA.F32    q13, q5, d2[0]
         VMLA.F32    q14, q4, d3[0]
         VMLA.F32    q15, q5, d3[0]
-        B           5b
+        B           4b
 
         // Store odd width
 10:
@@ -356,7 +355,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75
 
 13:
         VPOP        {d8-d15}
-        ADD         sp, sp, 8  // skip r2, r3
+        ADD         sp, sp, 12  // skip pad, r2, r3
         POP         {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
 END_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75
