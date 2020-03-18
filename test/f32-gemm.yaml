@@ -38,6 +38,10 @@
   k-block: 4
   pipelined: true
   assembly: true
+- name: xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a55
+  k-block: 4
+  pipelined: true
+  assembly: true
 - name: xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a73
   k-block: 8
   pipelined: true
@@ -62,6 +66,9 @@
   k-block: 2
   assembly: true
 - name: xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53
+  k-block: 4
+  pipelined: true
+- name: xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55
   k-block: 4
   pipelined: true
 - name: xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75
@@ -167,6 +174,8 @@
   k-block: 4
 - name: xnn_f32_gemm_ukernel_4x8s4__sse
   k-block: 4
+- name: xnn_f32_gemm_ukernel_4x2c4__sse
+  k-block: 4
 - name: xnn_f32_gemm_ukernel_1x8__avx_broadcast
   k-block: 1
 - name: xnn_f32_gemm_ukernel_4x8__avx_broadcast
@@ -242,6 +251,8 @@
 - name: xnn_f32_gemm_ukernel_4x8s4__psimd
   k-block: 4
 - name: xnn_f32_gemm_ukernel_6x8s4__psimd
+  k-block: 4
+- name: xnn_f32_gemm_ukernel_4x2c4__psimd
   k-block: 4
 - name: xnn_f32_gemm_ukernel_1x4__wasm
   k-block: 1
