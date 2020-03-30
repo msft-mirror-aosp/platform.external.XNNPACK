@@ -195,10 +195,14 @@ enum xnn_status xnn_define_tensor_value(
 /// Define a 2D Convolution Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param input_padding_top - implicit zero-padding above 2D input data.
-/// @param input_padding_right - implicit zero-padding to the right of 2D input data.
-/// @param input_padding_bottom - implicit zero-padding below 2D input data.
-/// @param input_padding_left - implicit zero-padding to the left of 2D input data.
+/// @param input_padding_top - implicit zero-padding above 2D input data. Must be 0 if XNN_FLAG_TENSORFLOW_SAME_PADDING
+///                            flag is specified.
+/// @param input_padding_right - implicit zero-padding to the right of 2D input data. Must be 0 if
+///                              XNN_FLAG_TENSORFLOW_SAME_PADDING flag is specified.
+/// @param input_padding_bottom - implicit zero-padding below 2D input data. Must be 0 if
+///                               XNN_FLAG_TENSORFLOW_SAME_PADDING flag is specified.
+/// @param input_padding_left - implicit zero-padding to the left of 2D input data. Must be 0 if
+///                             XNN_FLAG_TENSORFLOW_SAME_PADDING flag is specified.
 /// @param kernel_height - kernel (filter) height.
 /// @param kernel_width - kernel (filter) width.
 /// @param subsampling_height - height of subsampling region for convolution output (convolution height stride).
@@ -247,10 +251,14 @@ enum xnn_status xnn_define_convolution_2d(
 /// Define a 2D Depthwise Convolution Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param input_padding_top - implicit zero-padding above 2D input data.
-/// @param input_padding_right - implicit zero-padding to the right of 2D input data.
-/// @param input_padding_bottom - implicit zero-padding below 2D input data.
-/// @param input_padding_left - implicit zero-padding to the left of 2D input data.
+/// @param input_padding_top - implicit zero-padding above 2D input data. Must be 0 if XNN_FLAG_TENSORFLOW_SAME_PADDING
+///                            flag is specified.
+/// @param input_padding_right - implicit zero-padding to the right of 2D input data. Must be 0 if
+///                              XNN_FLAG_TENSORFLOW_SAME_PADDING flag is specified.
+/// @param input_padding_bottom - implicit zero-padding below 2D input data. Must be 0 if
+///                               XNN_FLAG_TENSORFLOW_SAME_PADDING flag is specified.
+/// @param input_padding_left - implicit zero-padding to the left of 2D input data. Must be 0 if
+///                             XNN_FLAG_TENSORFLOW_SAME_PADDING flag is specified.
 /// @param kernel_height - kernel (filter) height.
 /// @param kernel_width - kernel (filter) width.
 /// @param subsampling_height - height of subsampling region for convolution output (convolution height stride).
@@ -290,6 +298,92 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
   uint32_t input_id,
   uint32_t filter_id,
   uint32_t bias_id,
+  uint32_t output_id,
+  uint32_t flags);
+
+/// Define a 2D Average Pooling Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input_padding_top - implicit zero-padding above 2D input data. Must be 0 if XNN_FLAG_TENSORFLOW_SAME_PADDING
+///                            flag is specified.
+/// @param input_padding_right - implicit zero-padding to the right of 2D input data. Must be 0 if
+///                              XNN_FLAG_TENSORFLOW_SAME_PADDING flag is specified.
+/// @param input_padding_bottom - implicit zero-padding below 2D input data. Must be 0 if
+///                               XNN_FLAG_TENSORFLOW_SAME_PADDING flag is specified.
+/// @param input_padding_left - implicit zero-padding to the left of 2D input data. Must be 0 if
+///                             XNN_FLAG_TENSORFLOW_SAME_PADDING flag is specified.
+/// @param pooling_height - pooling (kernel) height.
+/// @param pooling_width - pooling (kernel) width.
+/// @param stride_height - displacing of the pooling window in the vertical dimension of the input pixels corresponding
+///                        to vertically adjacent output pixels.
+/// @param stride_width - displacing of the pooling window in the horizontal dimension of the input pixels corresponding
+///                        to horizontally adjacent output pixels.
+/// @param output_min - lower bound for clipping output values.
+/// @param output_max - upper bound for clipping output values.
+/// @param input_id - Value ID for the input tensor. The input tensor must be a 4D tensor defined in the @a subgraph
+///                   with [N, IH, IW, channels] dimensions
+/// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
+///                    with [N, OH, OW, channels] dimensions.
+/// @param flags - binary features of the 2D Average Pooling Node. The only currently supported values is
+///                XNN_FLAG_TENSORFLOW_SAME_PADDING.
+enum xnn_status xnn_define_average_pooling_2d(
+  xnn_subgraph_t subgraph,
+  uint32_t input_padding_top,
+  uint32_t input_padding_right,
+  uint32_t input_padding_bottom,
+  uint32_t input_padding_left,
+  uint32_t pooling_height,
+  uint32_t pooling_width,
+  uint32_t stride_height,
+  uint32_t stride_width,
+  float output_min,
+  float output_max,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
+/// Define a 2D Max Pooling Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input_padding_top - implicit zero-padding above 2D input data. Must be 0 if XNN_FLAG_TENSORFLOW_SAME_PADDING
+///                            flag is specified.
+/// @param input_padding_right - implicit zero-padding to the right of 2D input data. Must be 0 if
+///                              XNN_FLAG_TENSORFLOW_SAME_PADDING flag is specified.
+/// @param input_padding_bottom - implicit zero-padding below 2D input data. Must be 0 if
+///                               XNN_FLAG_TENSORFLOW_SAME_PADDING flag is specified.
+/// @param input_padding_left - implicit zero-padding to the left of 2D input data. Must be 0 if
+///                             XNN_FLAG_TENSORFLOW_SAME_PADDING flag is specified.
+/// @param pooling_height - pooling (kernel) height.
+/// @param pooling_width - pooling (kernel) width.
+/// @param stride_height - displacing of the pooling window in the vertical dimension of the input pixels corresponding
+///                        to vertically adjacent output pixels.
+/// @param stride_width - displacing of the pooling window in the horizontal dimension of the input pixels corresponding
+///                        to horizontally adjacent output pixels.
+/// @param dilation_height - dilation of pooling elements along the height dimension.
+/// @param dilation_width - dilation of pooling elements along the width dimension.
+/// @param output_min - lower bound for clipping output values.
+/// @param output_max - upper bound for clipping output values.
+/// @param input_id - Value ID for the input tensor. The input tensor must be a 4D tensor defined in the @a subgraph
+///                   with [N, IH, IW, channels] dimensions
+/// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
+///                    with [N, OH, OW, channels] dimensions.
+/// @param flags - binary features of the 2D Max Pooling Node. The only currently supported values is
+///                XNN_FLAG_TENSORFLOW_SAME_PADDING.
+enum xnn_status xnn_define_max_pooling_2d(
+  xnn_subgraph_t subgraph,
+  uint32_t input_padding_top,
+  uint32_t input_padding_right,
+  uint32_t input_padding_bottom,
+  uint32_t input_padding_left,
+  uint32_t pooling_height,
+  uint32_t pooling_width,
+  uint32_t stride_height,
+  uint32_t stride_width,
+  uint32_t dilation_height,
+  uint32_t dilation_width,
+  float output_min,
+  float output_max,
+  uint32_t input_id,
   uint32_t output_id,
   uint32_t flags);
 
@@ -801,8 +895,6 @@ enum xnn_status xnn_create_prelu_nc_f32(
   size_t input_stride,
   size_t output_stride,
   const float* negative_slope,
-  float output_min,
-  float output_max,
   uint32_t flags,
   xnn_operator_t* prelu_op_out);
 
