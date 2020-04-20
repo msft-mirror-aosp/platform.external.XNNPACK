@@ -96,11 +96,11 @@ struct xnn_ukernel_dconv2d {
 
 struct xnn_ukernel_dwconv {
   union {
-    xnn_dwconv_up_ukernel_function unipass_function;
-    xnn_dwconv_mp_ukernel_function multipass_function;
+    xnn_dwconv_unipass_ukernel_function unipass_function;
+    xnn_dwconv_multipass_ukernel_function multipass_function;
   };
-  uint8_t mr;
-  uint8_t qr;
+  uint8_t primary_tile;
+  uint8_t incremental_tile;
 };
 
 // Direct 2D Depthwise Convolution
@@ -113,17 +113,17 @@ struct xnn_ukernel_dwconv2d {
 };
 
 struct xnn_ukernel_gemm {
-  xnn_gemm_ukernel_function default_function;
-  xnn_gemm_ukernel_function mr1_function;
+  struct xnn_hmp_gemm_ukernel general_case;
+  struct xnn_hmp_gemm_ukernel mr1_case;
   uint8_t mr;
   uint8_t nr;
   uint8_t kr;
 };
 
 struct xnn_ukernel_igemm {
-  xnn_igemm_ukernel_function default_function;
-  xnn_igemm_ukernel_function mr1_function;
-  xnn_gemm_ukernel_function gemm_function;
+  struct xnn_hmp_igemm_ukernel general_case;
+  struct xnn_hmp_igemm_ukernel mr1_case;
+  struct xnn_hmp_gemm_ukernel gemm_case;
   uint8_t mr;
   uint8_t nr;
   uint8_t kr;
@@ -240,15 +240,25 @@ struct xnn_operator {
   uint32_t flags;
 
   union {
-    union xnn_f32_avgpool_params f32_avgpool_params;
+    // Parameters for Global Average Pooling in CHW layout
     union xnn_f32_gavgpool_params f32_gavgpool_params;
     union xnn_f32_hswish_params f32_hswish_params;
-    union xnn_f32_output_params f32_output_params;
+    // Pixelwise Average Pooling normally use f32_minmax_params, but also initialize
+    // f32_scaleminmax_params in case it needs to switch to Global Average Pooling operation.
+    struct {
+      union xnn_f32_scaleminmax_params f32_scaleminmax_params;
+      union xnn_f32_minmax_params f32_minmax_params;
+    };
     union xnn_f32_spchw_params f32_spchw_params;
     union xnn_q8_add_params q8_add_params;
-    union xnn_q8_avgpool_params q8_avgpool_params;
     union xnn_q8_gemm_params q8_gemm_params;
-    union xnn_u8_output_params u8_output_params;
+    // Average Pooling normally use q8_avgpool_params, but also initialize q8_gavgpool_params in case it needs to switch
+    // to Global Average Pooling operation.
+    struct {
+      union xnn_q8_avgpool_params q8_avgpool_params;
+      union xnn_q8_avgpool_params q8_gavgpool_params;
+    };
+    union xnn_u8_minmax_params u8_minmax_params;
   };
   enum xnn_operator_type type;
   struct xnn_ukernel ukernel;
