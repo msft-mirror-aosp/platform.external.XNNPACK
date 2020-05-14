@@ -371,6 +371,28 @@ static inline union xnn_f32_gavgpool_params xnn_init_scalar_f32_gavgpool_params(
   return params;
 }
 
+static inline struct xnn_f16_scaleminmax_params xnn_init_f16_scaleminmax_params(
+  uint16_t scale,
+  uint16_t min,
+  uint16_t max)
+{
+  struct xnn_f16_scaleminmax_params params;
+  params.scale = scale;
+  params.min = min;
+  params.max = max;
+  return params;
+}
+
+static inline struct xnn_f16_minmax_params xnn_init_f16_minmax_params(
+  uint16_t min,
+  uint16_t max)
+{
+  struct xnn_f16_minmax_params params;
+  params.min = min;
+  params.max = max;
+  return params;
+}
+
 static inline union xnn_f32_minmax_params xnn_init_f32_minmax_params(
   float output_min,
   float output_max)
@@ -395,6 +417,15 @@ static inline union xnn_f32_minmax_params xnn_init_scalar_f32_minmax_params(
   union xnn_f32_minmax_params params;
   params.scalar.min = output_min;
   params.scalar.max = output_max;
+  return params;
+}
+
+static inline struct xnn_f16_hswish_params xnn_init_f16_hswish_params(void)
+{
+  struct xnn_f16_hswish_params params;
+  params.sixth = fp16_ieee_from_fp32_value(0x1.555556p-3f);
+  params.half = fp16_ieee_from_fp32_value(0.5f);
+  params.one = fp16_ieee_from_fp32_value(1.0f);
   return params;
 }
 

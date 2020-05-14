@@ -19,8 +19,7 @@
 #     const float* zero,                 [sp + 16] -> x12
 #     const xnn_f32_minmax_params params [sp + 24] -> x8
 
-# d8-d15 need to be preserved if used.
-# x19-30 need to be preserved if used.
+# d8-d15, x19-x30 need to be preserved if used. x18 is reserved on iOS.
 
 # A pointers
 # x14 a0
@@ -74,7 +73,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a55
         CSEL x18, x17, x18, LO   //   c3 = c2
 
         ADD x13, x18, x7         // c4 = c3 + cm_stride
-                                 // if mr <= 5
+                                 // if mr <= 4
         CSEL x13, x18, x13, LS   //   c4 = c3
 
 
@@ -85,7 +84,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a55
         # Load cn_stride, a_offset
         LDP x10, x11, [sp]
 
-        # Load zero, clamping params pointer
+        # Load zero, params pointer
         LDP x12, x8, [sp, 16]
 
         # Load min/max values

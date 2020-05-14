@@ -9,11 +9,11 @@ third_party {
     type: GIT
     value: "https://github.com/google/XNNPACK"
   }
-  version: "1f4e46183fce43c8029176de054e8fe2d69644d7"
+  version: "c9852ba6aa893abf8101628735d0789ed43ed6d0"
   license_type: NOTICE
   last_upgrade_date {
     year: 2020
-    month: 4
+    month: 5
     day: 13
   }
 }
