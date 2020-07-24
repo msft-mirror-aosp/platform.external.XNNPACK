@@ -16,6 +16,8 @@
 #define XNN_MAX_RUNTIME_INPUTS 2
 #define XNN_MAX_RUNTIME_OUTPUTS 2
 
+#define XNN_INVALID_NODE_ID UINT32_MAX
+
 struct xnn_shape {
   size_t num_dims;
   size_t dim[XNN_MAX_TENSOR_DIMS];
@@ -24,6 +26,11 @@ struct xnn_shape {
 enum xnn_value_type {
   xnn_value_type_invalid = 0,
   xnn_value_type_dense_tensor = 1,
+};
+
+enum xnn_layout_type {
+  xnn_layout_type_nhwc = 0,
+  xnn_layout_type_nchw = 1,
 };
 
 /// Abstraction for a collections of elements produced and consumed by nodes.
@@ -45,6 +52,17 @@ struct xnn_value {
   uint32_t flags;
   /// Static initialization data. Must be null for non-static values.
   const void* data;
+  /// Index of the Subgraph node that produced the value, or XNN_INVALID_NODE_ID is the Value is an external input.
+  uint32_t producer;
+  /// Index of the first Node that consume the value, or XNN_INVALID_NODE_ID if the Value has no consumers within the
+  /// graph (e.g. Value is an external output).
+  uint32_t first_consumer;
+  /// Number of Nodes that consume the value.
+  /// If multiple inputs in a Node refer to this Value as input, the Node is counted as consumer multiple times.
+  /// If the Value is an external output, it counts as having an extra consumer.
+  uint32_t num_consumers;
+  uint32_t num_nchw_compatible_consumers;
+  enum xnn_layout_type layout;
 };
 
 struct xnn_blob {
@@ -57,20 +75,37 @@ struct xnn_blob {
 
 enum xnn_node_type {
   xnn_node_type_invalid = 0,
+  xnn_node_type_abs,
   xnn_node_type_add2,
   xnn_node_type_argmax_pooling_2d,
   xnn_node_type_average_pooling_2d,
+  xnn_node_type_bankers_rounding,
+  xnn_node_type_ceiling,
   xnn_node_type_clamp,
   xnn_node_type_convolution_2d,
   xnn_node_type_deconvolution_2d,
   xnn_node_type_depthwise_convolution_2d,
+  xnn_node_type_divide,
   xnn_node_type_fully_connected,
+  xnn_node_type_floor,
+  xnn_node_type_global_average_pooling_2d,
   xnn_node_type_hardswish,
-  xnn_node_type_multiply2,
+  xnn_node_type_leaky_relu,
   xnn_node_type_max_pooling_2d,
+  xnn_node_type_maximum2,
+  xnn_node_type_minimum2,
+  xnn_node_type_multiply2,
+  xnn_node_type_negate,
   xnn_node_type_prelu,
   xnn_node_type_sigmoid,
   xnn_node_type_softmax,
+  xnn_node_type_static_constant_pad,
+  xnn_node_type_static_reshape,
+  xnn_node_type_static_resize_bilinear_2d,
+  xnn_node_type_square,
+  xnn_node_type_square_root,
+  xnn_node_type_squared_difference,
+  xnn_node_type_subtract,
   xnn_node_type_unpooling_2d,
 };
 
@@ -126,10 +161,10 @@ struct xnn_node {
       size_t input_channels;
     } depthwise_convolution_2d;
     struct {
-      uint32_t input_padding_top;
-      uint32_t input_padding_right;
-      uint32_t input_padding_bottom;
-      uint32_t input_padding_left;
+      uint32_t padding_top;
+      uint32_t padding_right;
+      uint32_t padding_bottom;
+      uint32_t padding_left;
       uint32_t pooling_height;
       uint32_t pooling_width;
       uint32_t stride_height;
@@ -137,6 +172,21 @@ struct xnn_node {
       uint32_t dilation_height;
       uint32_t dilation_width;
     } pooling_2d;
+    struct {
+      float negative_slope;
+    } leaky_relu;
+    struct {
+      size_t pre_paddings[XNN_MAX_TENSOR_DIMS];
+      size_t post_paddings[XNN_MAX_TENSOR_DIMS];
+      uint32_t padding_value;
+    } static_pad;
+    struct {
+      struct xnn_shape new_shape;
+    } static_reshape;
+    struct {
+      size_t new_height;
+      size_t new_width;
+    } static_resize;
   } params;
   struct {
     float output_min;
@@ -149,15 +199,21 @@ struct xnn_node {
   uint32_t outputs[XNN_MAX_OUTPUTS];
   uint32_t num_outputs;
   uint32_t flags;
+  uint32_t layout_flags;
+  uint32_t cluster_leader;
 };
 
 struct xnn_operator_data {
-  xnn_operator_t op;
+  xnn_operator_t operator_object;
   size_t batch_size;
   size_t input_height;
   size_t input_width;
+  size_t output_height;
+  size_t output_width;
   struct xnn_shape shape1;
   struct xnn_shape shape2;
+  size_t pre_paddings[XNN_MAX_TENSOR_DIMS];
+  size_t post_paddings[XNN_MAX_TENSOR_DIMS];
   uint32_t adjustment_height;
   uint32_t adjustment_width;
   uint32_t inputs[XNN_MAX_RUNTIME_INPUTS];
@@ -183,7 +239,7 @@ struct xnn_runtime {
   uint32_t num_external_values;
 
   /// List of operators in the execution plan, in execution order.
-  struct xnn_operator_data* ops;
+  struct xnn_operator_data* opdata;
   /// Number of operators in the execution plan.
   size_t num_ops;
 
@@ -202,3 +258,8 @@ struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph);
 size_t xnn_tensor_get_size(
   xnn_subgraph_t subgraph,
   uint32_t value_id);
+
+enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph, uint32_t flags);
+
+void xnn_node_clear(struct xnn_node* node);
+void xnn_value_clear(struct xnn_value* value);
