@@ -23,10 +23,11 @@
 #include <fp16.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/params.h>
 
 
-static inline union xnn_q8_gemm_params xnn_init_scalar_q8_gemm_params(
+static inline union xnn_qu8_gemm_params xnn_init_scalar_qu8_gemm_params(
   uint8_t input_zero_point,
   uint8_t kernel_zero_point,
   float scale,
@@ -50,7 +51,7 @@ static inline union xnn_q8_gemm_params xnn_init_scalar_q8_gemm_params(
   const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
   const uint32_t remainder_threshold = remainder_mask >> 1;
 
-  union xnn_q8_gemm_params params;
+  union xnn_qu8_gemm_params params;
   params.scalar.input_zero_point = (int32_t) (uint32_t) input_zero_point;
   params.scalar.kernel_zero_point = (int32_t) (uint32_t) kernel_zero_point;
   params.scalar.multiplier = multiplier;
@@ -65,7 +66,7 @@ static inline union xnn_q8_gemm_params xnn_init_scalar_q8_gemm_params(
   return params;
 }
 
-static inline union xnn_q8_gemm_params xnn_init_q8_gemm_params(
+static inline union xnn_qu8_gemm_params xnn_init_qu8_gemm_params(
   uint8_t input_zero_point,
   uint8_t kernel_zero_point,
   float scale,
@@ -86,7 +87,7 @@ static inline union xnn_q8_gemm_params xnn_init_q8_gemm_params(
   assert(shift >= 0);
   assert(shift < 32);
 
-  union xnn_q8_gemm_params params;
+  union xnn_qu8_gemm_params params;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
     const uint32_t remainder_threshold = remainder_mask >> 1;
@@ -143,7 +144,7 @@ static inline union xnn_q8_gemm_params xnn_init_q8_gemm_params(
   return params;
 }
 
-static inline union xnn_q8_avgpool_params xnn_init_q8_avgpool_params(
+static inline union xnn_qu8_avgpool_params xnn_init_qu8_avgpool_params(
   int32_t bias,
   float scale,
   uint8_t output_zero_point,
@@ -165,7 +166,7 @@ static inline union xnn_q8_avgpool_params xnn_init_q8_avgpool_params(
   assert(shift >= 16);
   assert(shift < 64);
 
-  union xnn_q8_avgpool_params params;
+  union xnn_qu8_avgpool_params params;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const uint32_t right_shift = (uint32_t) shift;
     const uint64_t rounding = UINT64_C(1) << (right_shift - 1);
@@ -211,7 +212,7 @@ static inline union xnn_q8_avgpool_params xnn_init_q8_avgpool_params(
   return params;
 }
 
-static inline union xnn_q8_avgpool_params xnn_init_scalar_q8_avgpool_params(
+static inline union xnn_qu8_avgpool_params xnn_init_scalar_qu8_avgpool_params(
   int32_t bias,
   float scale,
   uint8_t output_zero_point,
@@ -233,7 +234,7 @@ static inline union xnn_q8_avgpool_params xnn_init_scalar_q8_avgpool_params(
   assert(shift >= 16);
   assert(shift < 64);
 
-  union xnn_q8_avgpool_params params;
+  union xnn_qu8_avgpool_params params;
   const uint32_t right_shift = (uint32_t) shift;
   const int64_t rounding = INT64_C(1) << (right_shift - 1);
   params.scalar.bias = bias;
@@ -248,6 +249,13 @@ static inline union xnn_q8_avgpool_params xnn_init_scalar_q8_avgpool_params(
   return params;
 }
 
+static inline void xnn_update_f16_scaleminmax_params(
+  struct xnn_f16_scaleminmax_params* params,
+  uint16_t scale)
+{
+  params->scale = scale;
+}
+
 static inline void xnn_update_f32_scaleminmax_params(
   union xnn_f32_scaleminmax_params* params,
   float scale)
@@ -259,6 +267,18 @@ static inline void xnn_update_f32_scaleminmax_params(
   #else
     params->scalar.scale = scale;
   #endif
+}
+
+static inline struct xnn_f16_scaleminmax_params xnn_init_f16_scaleminmax_params(
+  uint16_t scale,
+  uint16_t min,
+  uint16_t max)
+{
+  struct xnn_f16_scaleminmax_params params;
+  params.scale = scale;
+  params.min = min;
+  params.max = max;
+  return params;
 }
 
 static inline union xnn_f32_scaleminmax_params xnn_init_f32_scaleminmax_params(
@@ -314,6 +334,12 @@ static inline union xnn_f32_gavgpool_params xnn_init_f32_gavgpool_params(
     params.scalar.multiplier = multiplier;
     params.scalar.output_min = output_min;
     params.scalar.output_max = output_max;
+
+    const uint32_t w = (width - 1) & 3;
+    params.scalar.mask[0] = UINT32_C(0xFFFFFFFF);
+    params.scalar.mask[1] = -(int32_t) (w >= 1);
+    params.scalar.mask[2] = -(int32_t) (w >= 2);
+    params.scalar.mask[3] = -(int32_t) (w >= 3);
   #endif
   return params;
 }
@@ -343,6 +369,12 @@ static inline void xnn_update_f32_gavgpool_params(
     params->neon.mask[3] = -(uint32_t) (w >= 3);
   #else
     params->scalar.multiplier = multiplier;
+
+    const uint32_t w = (width - 1) & 3;
+    params->scalar.mask[0] = UINT32_C(0xFFFFFFFF);
+    params->scalar.mask[1] = (int32_t) (w >= 1);
+    params->scalar.mask[2] = (int32_t) (w >= 2);
+    params->scalar.mask[3] = (int32_t) (w >= 3);
   #endif
 }
 
@@ -368,18 +400,12 @@ static inline union xnn_f32_gavgpool_params xnn_init_scalar_f32_gavgpool_params(
   params.scalar.multiplier = multiplier;
   params.scalar.output_min = output_min;
   params.scalar.output_max = output_max;
-  return params;
-}
 
-static inline struct xnn_f16_scaleminmax_params xnn_init_f16_scaleminmax_params(
-  uint16_t scale,
-  uint16_t min,
-  uint16_t max)
-{
-  struct xnn_f16_scaleminmax_params params;
-  params.scale = scale;
-  params.min = min;
-  params.max = max;
+  const uint32_t w = (width - 1) & 3;
+  params.scalar.mask[0] = UINT32_C(0xFFFFFFFF);
+  params.scalar.mask[1] = -(int32_t) (w >= 1);
+  params.scalar.mask[2] = -(int32_t) (w >= 2);
+  params.scalar.mask[3] = -(int32_t) (w >= 3);
   return params;
 }
 
@@ -423,9 +449,9 @@ static inline union xnn_f32_minmax_params xnn_init_scalar_f32_minmax_params(
 static inline struct xnn_f16_hswish_params xnn_init_f16_hswish_params(void)
 {
   struct xnn_f16_hswish_params params;
-  params.sixth = fp16_ieee_from_fp32_value(0x1.555556p-3f);
-  params.half = fp16_ieee_from_fp32_value(0.5f);
-  params.one = fp16_ieee_from_fp32_value(1.0f);
+  params.sixth = UINT16_C(0x3155);
+  params.three = UINT16_C(0x4200);
+  params.six = UINT16_C(0x4600);
   return params;
 }
 
@@ -440,8 +466,8 @@ static inline union xnn_f32_hswish_params xnn_init_f32_hswish_params(void)
     }
   #else
     params.scalar.sixth = 0x1.555556p-3f;
-    params.scalar.half = 0.5f;
-    params.scalar.one = 1.0f;
+    params.scalar.three = 3.0f;
+    params.scalar.six = 6.0f;
   #endif
   return params;
 }
@@ -450,17 +476,110 @@ static inline union xnn_f32_hswish_params xnn_init_scalar_f32_hswish_params(void
 {
   union xnn_f32_hswish_params params;
   params.scalar.sixth = 0x1.555556p-3f;
-  params.scalar.half = 0.5f;
-  params.scalar.one = 1.0f;
+  params.scalar.three = 3.0f;
+  params.scalar.six = 6.0f;
   return params;
 }
 
-static inline union xnn_f32_spchw_params xnn_init_f32_spchw_params(
+static inline union xnn_f32_abs_params xnn_init_f32_abs_params(void)
+{
+  union xnn_f32_abs_params params = { 0 };
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+    for (uint32_t i = 0; i < 4; i++) {
+      params.sse.nonsign_mask[i] = math_nonsign_mask_f32();
+    }
+  #elif XNN_ARCH_WASMSIMD
+    params.wasmsimd.nonsign_mask = math_nonsign_mask_f32();
+  #endif
+  return params;
+}
+
+static inline union xnn_f32_abs_params xnn_init_scalar_f32_abs_params(void)
+{
+  union xnn_f32_abs_params params = { 0 };
+  return params;
+}
+
+static inline union xnn_f32_neg_params xnn_init_f32_neg_params(void)
+{
+  union xnn_f32_neg_params params = { 0 };
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+    for (uint32_t i = 0; i < 4; i++) {
+      params.sse.sign_mask[i] = -0.0f;
+    }
+  #elif XNN_ARCH_WASMSIMD
+    params.wasmsimd.sign_mask = -0.0f;
+  #endif
+  return params;
+}
+
+static inline union xnn_f32_neg_params xnn_init_scalar_f32_neg_params(void)
+{
+  union xnn_f32_neg_params params = { 0 };
+  return params;
+}
+
+static inline union xnn_f32_rnd_params xnn_init_f32_rnd_params(void)
+{
+  union xnn_f32_rnd_params params = { 0 };
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+    for (uint32_t i = 0; i < 4; i++) {
+      params.sse2.sign_mask[i] = -0.0f;
+    }
+    for (uint32_t i = 0; i < 4; i++) {
+      params.sse2.one[i] = 1.0f;
+    }
+  #endif
+  return params;
+}
+
+static inline union xnn_f32_rnd_params xnn_init_scalar_f32_rnd_params(void)
+{
+  union xnn_f32_rnd_params params = { 0 };
+  return params;
+}
+
+static inline union xnn_f32_lrelu_params xnn_init_f32_lrelu_params(float slope)
+{
+  union xnn_f32_lrelu_params params;
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+    for (uint32_t i = 0; i < 4; i++) {
+      params.sse.slope[i] = slope;
+    }
+  #else
+    params.scalar.slope = slope;
+  #endif
+  return params;
+}
+
+static inline union xnn_f32_lrelu_params xnn_init_scalar_f32_lrelu_params(float slope)
+{
+  union xnn_f32_lrelu_params params;
+  params.scalar.slope = slope;
+  return params;
+}
+
+static inline union xnn_f32_sqrt_params xnn_init_f32_sqrt_params(void)
+{
+  union xnn_f32_sqrt_params params = { 0 };
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+    params.fma.half = 0.5f;
+  #endif
+  return params;
+}
+
+static inline union xnn_f32_sqrt_params xnn_init_scalar_f32_sqrt_params(void)
+{
+  union xnn_f32_sqrt_params params = { 0 };
+  return params;
+}
+
+static inline union xnn_f32_chw_params xnn_init_f32_chw_params(
   uint32_t width,
   float output_min,
   float output_max)
 {
-  union xnn_f32_spchw_params params;
+  union xnn_f32_chw_params params;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     for (uint32_t i = 0; i < 4; i++) {
       params.sse.min[i] = output_min;
@@ -504,12 +623,28 @@ static inline union xnn_f32_spchw_params xnn_init_f32_spchw_params(
   #else
     params.scalar.min = output_min;
     params.scalar.max = output_max;
+
+    const uint32_t w4 = (width - 1) & 3;
+    params.scalar.mask[0] = UINT32_C(0xFFFFFFFF);
+    params.scalar.mask[1] = -(uint32_t) (w4 >= 1);
+    params.scalar.mask[2] = -(uint32_t) (w4 >= 2);
+    params.scalar.mask[3] = -(uint32_t) (w4 >= 3);
+
+    const uint32_t w8 = (width - 1) & 7;
+    params.scalar.mask_even[0] = UINT32_C(0xFFFFFFFF);
+    params.scalar.mask_even[1] = -(uint32_t) (w8 >= 2);
+    params.scalar.mask_even[2] = -(uint32_t) (w8 >= 4);
+    params.scalar.mask_even[3] = -(uint32_t) (w8 >= 6);
+    params.scalar.mask_odd[0] = -(uint32_t) (w8 >= 1);
+    params.scalar.mask_odd[1] = -(uint32_t) (w8 >= 3);
+    params.scalar.mask_odd[2] = -(uint32_t) (w8 >= 5);
+    params.scalar.mask_odd[3] = -(uint32_t) (w8 >= 7);
   #endif
   return params;
 }
 
-static inline void xnn_update_f32_spchw_params(
-  union xnn_f32_spchw_params* params,
+static inline void xnn_update_f32_chw_params(
+  union xnn_f32_chw_params* params,
   uint32_t width)
 {
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -544,17 +679,50 @@ static inline void xnn_update_f32_spchw_params(
     params->neon.mask_odd[1] = -(uint32_t) (w8 >= 3);
     params->neon.mask_odd[2] = -(uint32_t) (w8 >= 5);
     params->neon.mask_odd[3] = -(uint32_t) (w8 >= 7);
+  #else
+    const uint32_t w4 = (width - 1) & 3;
+    params->scalar.mask[0] = UINT32_C(0xFFFFFFFF);
+    params->scalar.mask[1] = -(uint32_t) (w4 >= 1);
+    params->scalar.mask[2] = -(uint32_t) (w4 >= 2);
+    params->scalar.mask[3] = -(uint32_t) (w4 >= 3);
+
+    const uint32_t w8 = (width - 1) & 7;
+    params->scalar.mask_even[0] = UINT32_C(0xFFFFFFFF);
+    params->scalar.mask_even[1] = -(uint32_t) (w8 >= 2);
+    params->scalar.mask_even[2] = -(uint32_t) (w8 >= 4);
+    params->scalar.mask_even[3] = -(uint32_t) (w8 >= 6);
+    params->scalar.mask_odd[0] = -(uint32_t) (w8 >= 1);
+    params->scalar.mask_odd[1] = -(uint32_t) (w8 >= 3);
+    params->scalar.mask_odd[2] = -(uint32_t) (w8 >= 5);
+    params->scalar.mask_odd[3] = -(uint32_t) (w8 >= 7);
   #endif
 }
 
-static inline union xnn_f32_spchw_params xnn_init_scalar_f32_spchw_params(
+static inline union xnn_f32_chw_params xnn_init_scalar_f32_chw_params(
   uint32_t width,
   float output_min,
   float output_max)
 {
-  union xnn_f32_spchw_params params;
+  union xnn_f32_chw_params params;
   params.scalar.min = output_min;
   params.scalar.max = output_max;
+
+  const uint32_t w4 = (width - 1) & 3;
+  params.scalar.mask[0] = UINT32_C(0xFFFFFFFF);
+  params.scalar.mask[1] = -(uint32_t) (w4 >= 1);
+  params.scalar.mask[2] = -(uint32_t) (w4 >= 2);
+  params.scalar.mask[3] = -(uint32_t) (w4 >= 3);
+
+  const uint32_t w8 = (width - 1) & 7;
+  params.scalar.mask_even[0] = UINT32_C(0xFFFFFFFF);
+  params.scalar.mask_even[1] = -(uint32_t) (w8 >= 2);
+  params.scalar.mask_even[2] = -(uint32_t) (w8 >= 4);
+  params.scalar.mask_even[3] = -(uint32_t) (w8 >= 6);
+  params.scalar.mask_odd[0] = -(uint32_t) (w8 >= 1);
+  params.scalar.mask_odd[1] = -(uint32_t) (w8 >= 3);
+  params.scalar.mask_odd[2] = -(uint32_t) (w8 >= 5);
+  params.scalar.mask_odd[3] = -(uint32_t) (w8 >= 7);
+
   return params;
 }
 
@@ -592,7 +760,7 @@ static inline union xnn_u8_minmax_params xnn_init_scalar_u8_minmax_params(
   return params;
 }
 
-static inline union xnn_q8_add_params xnn_init_q8_add_params(
+static inline union xnn_qu8_add_params xnn_init_qu8_add_params(
   uint8_t a_zero_point,
   uint8_t b_zero_point,
   uint8_t output_zero_point,
@@ -626,7 +794,7 @@ static inline union xnn_q8_add_params xnn_init_q8_add_params(
   assert(a_multiplier < UINT32_C(0x00400000));
   assert(b_multiplier < UINT32_C(0x00400000));
 
-  union xnn_q8_add_params params;
+  union xnn_qu8_add_params params;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
     const uint32_t remainder_threshold = remainder_mask >> 1;
@@ -681,7 +849,7 @@ static inline union xnn_q8_add_params xnn_init_q8_add_params(
   return params;
 }
 
-static inline union xnn_q8_add_params xnn_init_scalar_q8_add_params(
+static inline union xnn_qu8_add_params xnn_init_scalar_qu8_add_params(
   uint8_t a_zero_point,
   uint8_t b_zero_point,
   uint8_t output_zero_point,
@@ -713,7 +881,7 @@ static inline union xnn_q8_add_params xnn_init_scalar_q8_add_params(
   assert(a_multiplier < UINT32_C(0x00400000));
   assert(b_multiplier < UINT32_C(0x00400000));
 
-  union xnn_q8_add_params params;
+  union xnn_qu8_add_params params;
   const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
   const uint32_t remainder_threshold = remainder_mask >> 1;
   params.scalar.zero_point_product =

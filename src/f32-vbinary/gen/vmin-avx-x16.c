@@ -26,6 +26,9 @@ void xnn_f32_vmin_ukernel__avx_x16(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
 
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
@@ -39,6 +42,7 @@ void xnn_f32_vmin_ukernel__avx_x16(
 
     __m256 vy01234567 = _mm256_min_ps(va01234567, vb01234567);
     __m256 vy89ABCDEF = _mm256_min_ps(va89ABCDEF, vb89ABCDEF);
+
 
 
     _mm256_storeu_ps(y, vy01234567);
