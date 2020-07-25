@@ -291,13 +291,13 @@ void xnn_compute_subconv2d(
       &context->params);
 }
 
-void xnn_compute_dconv2d_hwc2spchw(
-      const struct dconv2d_context context[restrict XNN_MIN_ELEMENTS(1)],
+void xnn_compute_conv2d_hwc2chw(
+      const struct conv2d_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
       size_t output_y_start,
       size_t output_y_slice)
 {
-  context->hwc2spchw_ukernel(
+  context->hwc2chw_ukernel(
       context->input_height,
       context->input_width,
       output_y_start,
@@ -325,15 +325,17 @@ void xnn_compute_dwconv_unipass(
     (void*) ((uintptr_t) context->output + output_y * context->output_row_stride),
     context->indirection_buffer_col_stride,
     context->output_col_increment,
+    context->input_offset,
+    context->zero,
     &context->params);
 }
 
-void xnn_compute_dwconv2d_spchw(
+void xnn_compute_dwconv2d_chw(
     const struct dwconv2d_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,
     size_t channel)
 {
-  context->spchw_ukernel(
+  context->chw_ukernel(
     context->input_height,
     context->input_width,
     (const void*) ((uintptr_t) context->input + channel * context->input_channel_stride + batch_index * context->input_batch_stride),
@@ -364,8 +366,7 @@ void xnn_compute_argmax_pooling_unipass(
   context->unipass_ukernel(
     context->output_width, context->pooling_size, context->channels,
     indirect_input, input_offset, output, index,
-    context->input_increment, context->output_increment,
-    &context->params);
+    context->input_increment, context->output_increment);
 }
 
 void xnn_compute_argmax_pooling_multipass(
@@ -375,7 +376,7 @@ void xnn_compute_argmax_pooling_multipass(
 {
   const void** indirect_input = (const void**) ((uintptr_t) context->indirect_input +
     output_y * context->indirect_input_height_stride);
-  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;  
+  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;
   void* output = (void*) ((uintptr_t) context->output +
     batch_index * context->output_batch_stride + output_y * context->output_height_stride);
   uint32_t* index = (uint32_t*) ((uintptr_t) context->index +
@@ -387,8 +388,7 @@ void xnn_compute_argmax_pooling_multipass(
   context->multipass_ukernel(
     context->output_width, context->pooling_size, context->channels,
     indirect_input, input_offset, multipass_accumulation_buffer, multipass_index_buffer, output, index,
-    context->input_increment, context->output_increment,
-    &context->params);
+    context->input_increment, context->output_increment);
 }
 
 void xnn_compute_max_pooling(
@@ -603,46 +603,42 @@ void xnn_compute_prelu(
   context->ukernel(batch_range, context->n, x, x_stride, context->w, y, y_stride);
 }
 
-void xnn_compute_channel_pad(
-    const struct channel_pad_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_start,
-    size_t batch_range)
+void xnn_compute_pad_5d(
+    const struct pad_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t i, size_t j, size_t k, size_t l, size_t m,
+    size_t l_range, size_t m_range)
 {
-  const size_t x_stride = context->x_stride;
-  const size_t y_stride = context->y_stride;
-  const void* x = (const void*) ((uintptr_t) context->x + x_stride * batch_start);
-  void* y = (void*) ((uintptr_t) context->y + y_stride * batch_start);
+  assert(l_range == 1);
+  assert(m_range == 1);
 
-  context->ukernel(batch_range, context->n, context->l, context->r, context->c, x, x_stride, y, y_stride);
-}
+  const void* input = (const void*) ((uintptr_t) context->input +
+    i * context->input_stride[4] + j * context->input_stride[3] + k * context->input_stride[2] + l * context->input_stride[1] + m * context->input_stride[0]);
+  void* output = (void*) ((uintptr_t) context->output +
+    i * context->output_stride[4] + j * context->output_stride[3] + k * context->output_stride[2] + l * context->output_stride[1] + m * context->output_stride[0]);
 
-void xnn_compute_add_strided(
-    const struct add_strided_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index,
-    size_t batch_range /* always 1 */)
-{
-  assert(batch_range == 1);
+  const size_t i_padding = context->pre_paddings[5];
+  const size_t j_padding = context->pre_paddings[4];
+  const size_t k_padding = context->pre_paddings[3];
+  const size_t l_padding = context->pre_paddings[2];
+  const size_t m_padding = context->pre_paddings[1];
 
-  const size_t n = context->n;
-  const size_t a_stride = context->a_stride;
-  const size_t b_stride = context->b_stride;
-  const size_t y_stride = context->y_stride;
-  const void* a = (const void*) ((uintptr_t) context->a + a_stride * batch_index);
-  const void* b = (const void*) ((uintptr_t) context->b + b_stride * batch_index);
-  void* y = (void*) ((uintptr_t) context->y + y_stride * batch_index);
+  const size_t i_size = context->input_size[5];
+  const size_t j_size = context->input_size[4];
+  const size_t k_size = context->input_size[3];
+  const size_t l_size = context->input_size[2];
+  const size_t m_size = context->input_size[1];
 
-  context->ukernel(n, a, b, y, &context->params);
-}
-
-void xnn_compute_add_contiguous(
-    const struct add_contiguous_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t offset,
-    size_t size)
-{
-  const void* a = (const void*) ((uintptr_t) context->a + offset);
-  const void* b = (const void*) ((uintptr_t) context->b + offset);
-  void* y = (void*) ((uintptr_t) context->y + offset);
-  context->ukernel(size, a, b, y, &context->params);
+  if XNN_LIKELY(i - i_padding < i_size && j - j_padding < j_size && k - k_padding < k_size &&
+                l - l_padding < l_size && m - m_padding < m_size)
+  {
+    context->pad_ukernel(
+      1 /* rows */,
+      context->input_size[0], context->pre_paddings[0], context->post_paddings[0],
+      &context->padding_value,
+      input, 0 /* input stride */, output, 0 /* output stride */);
+  } else {
+    context->fill_ukernel(1 /* rows */, context->output_size[0], output, 0 /* output stride */, &context->padding_value);
+  }
 }
 
 void xnn_compute_elementwise_binary_5d(
@@ -890,7 +886,7 @@ void xnn_compute_vmulcaddc(
 
 enum xnn_status xnn_run_operator(xnn_operator_t op, pthreadpool_t threadpool)
 {
-  if (!xnn_params.initialized) {
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to run operator: XNNPACK is not initialized");
     return xnn_status_uninitialized;
   }

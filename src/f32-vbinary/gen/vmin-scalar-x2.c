@@ -23,6 +23,9 @@ void xnn_f32_vmin_ukernel__scalar_x2(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
 
   for (; n >= 2 * sizeof(float); n -= 2 * sizeof(float)) {
@@ -36,6 +39,7 @@ void xnn_f32_vmin_ukernel__scalar_x2(
 
     float vy0 = math_min_f32(va0, vb0);
     float vy1 = math_min_f32(va1, vb1);
+
 
 
     y[0] = vy0;
