@@ -19,10 +19,12 @@ void xnn_f32_clamp_ukernel__neon_x8(
     size_t n,
     const float* x,
     float* y,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   const float32x4_t vy_min = vld1q_dup_f32(&params->scalar.min);
   const float32x4_t vy_max = vld1q_dup_f32(&params->scalar.max);

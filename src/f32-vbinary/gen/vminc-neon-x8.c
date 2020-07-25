@@ -20,10 +20,13 @@ void xnn_f32_vminc_ukernel__neon_x8(
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
 
   const float32x4_t vb = vld1q_dup_f32(b);
@@ -33,6 +36,7 @@ void xnn_f32_vminc_ukernel__neon_x8(
 
     float32x4_t vy0123 = vminq_f32(va0123, vb);
     float32x4_t vy4567 = vminq_f32(va4567, vb);
+
 
 
     vst1q_f32(y, vy0123); y += 4;

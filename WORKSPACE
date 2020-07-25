@@ -45,9 +45,9 @@ http_archive(
 # pthreadpool library, used for parallelization
 http_archive(
     name = "pthreadpool",
-    strip_prefix = "pthreadpool-6525d8bb736b323eb4df9e4f3afdd3a8458d1a20",
-    sha256 = "af8c518b6ec65dca216143ddf5ef9d2e6b133123f9a47a24841ef447c5d91bd1",
-    urls = ["https://github.com/Maratyszcza/pthreadpool/archive/6525d8bb736b323eb4df9e4f3afdd3a8458d1a20.zip"],
+    strip_prefix = "pthreadpool-029c88620802e1361ccf41d1970bd5b07fd6b7bb",
+    sha256 = "03312bd7d8d9e379d685258963ee8820767158b5946cdd00336ff17dae851001",
+    urls = ["https://github.com/Maratyszcza/pthreadpool/archive/029c88620802e1361ccf41d1970bd5b07fd6b7bb.zip"],
 )
 
 # clog library, used for logging
@@ -61,13 +61,14 @@ http_archive(
     build_file = "@//third_party:clog.BUILD",
 )
 
+
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
     name = "cpuinfo",
-    strip_prefix = "cpuinfo-2b14e445016dd46f7de821cdf3093e2823b9ab21",
-    sha256 = "599ec5036fd225de01a866e7226ba6a5bca480d841ff0a0bede9138db7a655be",
+    strip_prefix = "cpuinfo-6cecd15784fcb6c5c0aa7311c6248879ce2cb8b2",
+    sha256 = "b1f2ee97e46d8917a66bcb47452fc510d511829556c93b83e06841b9b35261a5",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/2b14e445016dd46f7de821cdf3093e2823b9ab21.zip",
+        "https://github.com/pytorch/cpuinfo/archive/6cecd15784fcb6c5c0aa7311c6248879ce2cb8b2.zip",
     ],
     build_file = "@//third_party:cpuinfo.BUILD",
     patches = ["@//third_party:cpuinfo.patch"],
@@ -76,9 +77,9 @@ http_archive(
 # psimd library, used for fallback 128-bit SIMD micro-kernels
 http_archive(
     name = "psimd",
-    strip_prefix = "psimd-85427dd4c8521cc037a1ffa6fcd25c55fafc8a00",
-    sha256 = "db23c2bc4a58d6f40c181797e43103300edac7cf9d286ca81590543f66ab95d2",
-    urls = ["https://github.com/Maratyszcza/psimd/archive/85427dd4c8521cc037a1ffa6fcd25c55fafc8a00.zip"],
+    strip_prefix = "psimd-072586a71b55b7f8c584153d223e95687148a900",
+    sha256 = "dc615342bcbe51ca885323e51b68b90ed9bb9fa7df0f4419dbfa0297d5e837b7",
+    urls = ["https://github.com/Maratyszcza/psimd/archive/072586a71b55b7f8c584153d223e95687148a900.zip"],
     build_file = "@//third_party:psimd.BUILD",
 )
 

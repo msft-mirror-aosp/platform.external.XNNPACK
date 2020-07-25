@@ -8,31 +8,13 @@
 #include <xnnpack/common.h>
 
 
-#if defined(__SSE__) || defined(_M_X64) || (defined(_M_IX86_FP) && (_M_IX86_FP >= 1))
-#include <xmmintrin.h>
-
-static XNN_INTRINSIC XNN_DISABLE_TSAN
-__m128 _mm_loadu_ps_notsan(const float* address) {
-  return _mm_loadu_ps(address);
-}
-#endif
-
-#if defined(__SSE2__) || defined(_M_X64) || (defined(_M_IX86_FP) && (_M_IX86_FP >= 2))
-#include <emmintrin.h>
-
-static XNN_INTRINSIC XNN_DISABLE_TSAN
-__m128i _mm_loadu_si128_notsan(const __m128i* address) {
-  return _mm_loadu_si128(address);
-}
-#endif
-
-
 #ifdef __AVX512F__
 #include <immintrin.h>
 
-// GCC pre-7, Clang pre-8, Apple Clang pre-11, and ICC pre-18
+// GCC pre-7, Clang pre-8, Android NDK Clang pre-8.0.7, Apple Clang pre-11, and ICC pre-18
 #if (defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && (__GNUC__ < 7)) || \
     (defined(__clang__) && !defined(__apple_build_version__) && (__clang_major__ < 8)) || \
+    (defined(__clang__) && defined(__ANDROID__) && (__clang_major__ == 8) && (__clang_minor__ == 0) && (__clang_patchlevel__ < 7)) || \
     (defined(__clang__) && defined(__apple_build_version__) && (__apple_build_version__ < 11000000)) || \
     (defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1800))
 
