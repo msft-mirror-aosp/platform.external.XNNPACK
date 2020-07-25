@@ -26,6 +26,9 @@ void xnn_f32_vsubc_minmax_ukernel__avx_x16(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
   const __m256 vy_min = _mm256_broadcast_ps((const __m128*) params->sse.min);
   const __m256 vy_max = _mm256_broadcast_ps((const __m128*) params->sse.max);
@@ -38,6 +41,7 @@ void xnn_f32_vsubc_minmax_ukernel__avx_x16(
 
     __m256 vy01234567 = _mm256_sub_ps(va01234567, vb);
     __m256 vy89ABCDEF = _mm256_sub_ps(va89ABCDEF, vb);
+
 
     vy01234567 = _mm256_max_ps(vy01234567, vy_min);
     vy89ABCDEF = _mm256_max_ps(vy89ABCDEF, vy_min);
