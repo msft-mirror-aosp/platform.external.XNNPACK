@@ -19,10 +19,12 @@ void xnn_f32_clamp_ukernel__neon_x4(
     size_t n,
     const float* x,
     float* y,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   const float32x4_t vy_min = vld1q_dup_f32(&params->scalar.min);
   const float32x4_t vy_max = vld1q_dup_f32(&params->scalar.max);
@@ -35,12 +37,6 @@ void xnn_f32_clamp_ukernel__neon_x4(
     vacc0123 = vminq_f32(vacc0123, vy_max);
 
     vst1q_f32(y, vacc0123); y += 4;
-  }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    float32x4_t vacc = vld1q_f32(x); x += 4;
-    vacc = vmaxq_f32(vacc, vy_min);
-    vacc = vminq_f32(vacc, vy_max);
-    vst1q_f32(y, vacc); y += 4;
   }
   if XNN_UNLIKELY(n != 0) {
     float32x4_t vacc = vld1q_f32(x);
