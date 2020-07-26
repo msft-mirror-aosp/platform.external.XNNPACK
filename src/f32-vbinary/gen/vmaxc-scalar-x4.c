@@ -23,6 +23,9 @@ void xnn_f32_vmaxc_ukernel__scalar_x4(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
 
   const float vb = *b;
@@ -37,6 +40,7 @@ void xnn_f32_vmaxc_ukernel__scalar_x4(
     float vy1 = math_max_f32(va1, vb);
     float vy2 = math_max_f32(va2, vb);
     float vy3 = math_max_f32(va3, vb);
+
 
 
     y[0] = vy0;

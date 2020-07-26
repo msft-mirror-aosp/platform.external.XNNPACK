@@ -21,10 +21,13 @@ void xnn_f32_vmaxc_ukernel__sse_x8(
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
 
   const __m128 vb = _mm_load1_ps(b);
@@ -35,6 +38,7 @@ void xnn_f32_vmaxc_ukernel__sse_x8(
 
     __m128 vy0123 = _mm_max_ps(va0123, vb);
     __m128 vy4567 = _mm_max_ps(va4567, vb);
+
 
 
     _mm_storeu_ps(y, vy0123);
@@ -50,7 +54,7 @@ void xnn_f32_vmaxc_ukernel__sse_x8(
     y += 4;
   }
   if XNN_UNLIKELY(n != 0) {
-    const __m128 va0123 = _mm_loadu_ps_notsan(a);
+    const __m128 va0123 = _mm_loadu_ps(a);
 
     __m128 vy0123 = _mm_max_ps(va0123, vb);
     if (n & (2 * sizeof(float))) {
