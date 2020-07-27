@@ -1742,6 +1742,7 @@ cc_defaults {
         "-Wno-unused-parameter",
         "-Wno-missing-field-initializers",
         "-Wno-pointer-arith",
+        "-Wno-implicit-function-declaration",
     ],
     stl: "libc++_static",
 }
