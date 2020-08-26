@@ -19,10 +19,12 @@ void xnn_f32_clamp_ukernel__sse_x8(
     size_t n,
     const float* x,
     float* y,
-    const union xnn_f32_minmax_params params[restrict static 1])
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   const __m128 vy_min = _mm_load_ps(params->sse.min);
   const __m128 vy_max = _mm_load_ps(params->sse.max);

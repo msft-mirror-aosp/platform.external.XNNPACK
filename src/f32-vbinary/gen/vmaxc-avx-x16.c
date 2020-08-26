@@ -22,10 +22,13 @@ void xnn_f32_vmaxc_ukernel__avx_x16(
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_default_params params[restrict static 1])
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
 
   const __m256 vb = _mm256_broadcast_ss(b);
@@ -36,6 +39,7 @@ void xnn_f32_vmaxc_ukernel__avx_x16(
 
     __m256 vy01234567 = _mm256_max_ps(va01234567, vb);
     __m256 vy89ABCDEF = _mm256_max_ps(va89ABCDEF, vb);
+
 
 
     _mm256_storeu_ps(y, vy01234567);

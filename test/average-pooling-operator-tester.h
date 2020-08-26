@@ -16,6 +16,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <functional>
+#include <limits>
 #include <random>
 #include <vector>
 
@@ -444,10 +445,10 @@ class AveragePoolingOperatorTester {
     return this->iterations_;
   }
 
-  void TestQ8() const {
+  void TestQU8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
+    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
     std::vector<uint8_t> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
     std::vector<uint8_t> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
@@ -487,7 +488,7 @@ class AveragePoolingOperatorTester {
       xnn_operator_t average_pooling_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
-        xnn_create_average_pooling2d_nhwc_q8(
+        xnn_create_average_pooling2d_nhwc_qu8(
           padding_top(), padding_right(), padding_bottom(), padding_left(),
           pooling_height(), pooling_width(),
           stride_height(), stride_width(),
@@ -502,7 +503,7 @@ class AveragePoolingOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_average_pooling_op(average_pooling_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_average_pooling2d_nhwc_q8(
+        xnn_setup_average_pooling2d_nhwc_qu8(
           average_pooling_op,
           batch_size(), input_height(), input_width(),
           input.data(), output.data(),
@@ -624,10 +625,10 @@ class AveragePoolingOperatorTester {
     }
   }
 
-  void TestSetupQ8() const {
+  void TestSetupQU8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
+    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + std::max(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
@@ -672,7 +673,7 @@ class AveragePoolingOperatorTester {
       xnn_operator_t average_pooling_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
-        xnn_create_average_pooling2d_nhwc_q8(
+        xnn_create_average_pooling2d_nhwc_qu8(
           padding_top(), padding_right(), padding_bottom(), padding_left(),
           pooling_height(), pooling_width(),
           stride_height(), stride_width(),
@@ -684,7 +685,7 @@ class AveragePoolingOperatorTester {
       ASSERT_NE(nullptr, average_pooling_op);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_average_pooling2d_nhwc_q8(
+        xnn_setup_average_pooling2d_nhwc_qu8(
           average_pooling_op,
           batch_size(), input_height(), input_width(),
           input.data(), output.data(),
@@ -739,7 +740,7 @@ class AveragePoolingOperatorTester {
 
       // Setup and run Average Pooling operator the second time, and destroy the operator.
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_average_pooling2d_nhwc_q8(
+        xnn_setup_average_pooling2d_nhwc_qu8(
           average_pooling_op,
           next_batch_size(), next_input_height(), next_input_width(),
           input.data(), output.data(),

@@ -21,10 +21,13 @@ void xnn_f32_vmulc_minmax_ukernel__avx512f_x16(
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_minmax_params params[restrict static 1])
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
   const __m512 vy_min = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.min));
   const __m512 vy_max = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.max));
@@ -36,21 +39,12 @@ void xnn_f32_vmulc_minmax_ukernel__avx512f_x16(
 
     __m512 vy0123456789ABCDEF = _mm512_mul_ps(va0123456789ABCDEF, vb);
 
+
     vy0123456789ABCDEF = _mm512_max_ps(vy0123456789ABCDEF, vy_min);
 
     vy0123456789ABCDEF = _mm512_min_ps(vy0123456789ABCDEF, vy_max);
 
     _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    y += 16;
-  }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(a);
-    a += 16;
-
-    __m512 vy = _mm512_mul_ps(va, vb);
-    vy = _mm512_max_ps(vy, vy_min);
-    vy = _mm512_min_ps(vy, vy_max);
-    _mm512_storeu_ps(y, vy);
     y += 16;
   }
   if XNN_UNLIKELY(n != 0) {

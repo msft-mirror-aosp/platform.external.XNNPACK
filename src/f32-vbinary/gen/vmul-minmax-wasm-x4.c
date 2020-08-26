@@ -19,10 +19,13 @@ void xnn_f32_vmul_minmax_ukernel__wasm_x4(
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_minmax_params params[restrict static 1])
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
   const float vy_min = params->scalar.min;
   const float vy_max = params->scalar.max;
@@ -44,6 +47,7 @@ void xnn_f32_vmul_minmax_ukernel__wasm_x4(
     float vy1 = va1 * vb1;
     float vy2 = va2 * vb2;
     float vy3 = va3 * vb3;
+
 
     vy0 = __builtin_wasm_max_f32(vy0, vy_min);
     vy1 = __builtin_wasm_max_f32(vy1, vy_min);

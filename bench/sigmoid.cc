@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <random>
 #include <vector>
 
@@ -23,14 +24,14 @@
 #include "tensorflow/lite/version.h"
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
-
-static void xnnpack_sigmoid_q8(benchmark::State& state) {
+#ifndef XNN_NO_QU8_OPERATORS
+static void xnnpack_sigmoid_qu8(benchmark::State& state) {
   const size_t batch_size = state.range(0);
   const size_t channels = state.range(1);
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
+  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
   std::vector<uint8_t> input(batch_size * channels);
   std::vector<uint8_t> output(batch_size * channels);
@@ -44,7 +45,7 @@ static void xnnpack_sigmoid_q8(benchmark::State& state) {
   }
 
   xnn_operator_t sigmoid_op = nullptr;
-  status = xnn_create_sigmoid_nc_q8(
+  status = xnn_create_sigmoid_nc_qu8(
     channels, channels /* input stride */, channels /* output stride */,
     127 /* input zero point */, 1.0f /* input scale */,
     0 /* output zero point */, 1.0f / 256.0f /* output scale */,
@@ -55,7 +56,7 @@ static void xnnpack_sigmoid_q8(benchmark::State& state) {
     return;
   }
 
-  status = xnn_setup_sigmoid_nc_q8(
+  status = xnn_setup_sigmoid_nc_qu8(
     sigmoid_op,
     batch_size,
     input.data(), output.data(),
@@ -89,6 +90,7 @@ static void xnnpack_sigmoid_q8(benchmark::State& state) {
   state.counters["bytes"] =
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
+#endif  // XNN_NO_QU8_OPERATORS
 
 static void xnnpack_sigmoid_f32(benchmark::State& state) {
   const size_t batch_size = state.range(0);
@@ -276,7 +278,9 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b)
   }
 }
 
-BENCHMARK(xnnpack_sigmoid_q8)->Apply(CharacteristicArguments)->UseRealTime();
+#ifndef XNN_NO_QU8_OPERATORS
+BENCHMARK(xnnpack_sigmoid_qu8)->Apply(CharacteristicArguments)->UseRealTime();
+#endif  // XNN_NO_QU8_OPERATORS
 BENCHMARK(xnnpack_sigmoid_f32)->Apply(CharacteristicArguments)->UseRealTime();
 
 #ifdef BENCHMARK_TENSORFLOW_LITE

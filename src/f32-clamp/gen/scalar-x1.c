@@ -18,10 +18,12 @@ void xnn_f32_clamp_ukernel__scalar_x1(
     size_t n,
     const float* x,
     float* y,
-    const union xnn_f32_minmax_params params[restrict static 1])
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   const float vy_min = params->scalar.min;
   const float vy_max = params->scalar.max;

@@ -76,7 +76,7 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
   std::vector<float, AlignedAllocator<float, 32>> w(w_elements * num_buffers);
   std::fill(w.begin(), w.end(), 0.0f);
   xnn_pack_f32_gemm_goi_w(1 /* groups */, group_output_channels, group_input_channels * kernel_size,
-    nr, kr, sr, k.data(), b.data(), w.data());
+    nr, kr, sr, k.data(), b.data(), w.data(), nullptr);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
   }
@@ -86,7 +86,7 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
   std::vector<float> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), std::nanf(""));
 
-  xnn_f32_minmax_params minmax_params =
+  xnn_f32_minmax_params params =
     xnn_init_f32_minmax_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
@@ -119,7 +119,7 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
           inputData + m * kernel_size * group_input_channels, kernel_size * group_input_channels * sizeof(float),
           w.data() + (buffer_index * nc_stride + n) * (kernel_size * kc_stride + 1),
           c.data() + (buffer_index * output_size + m) * group_output_channels + n, group_output_channels * sizeof(float), nr * sizeof(float),
-          &minmax_params);
+          &params);
       }
     }
   }
@@ -141,14 +141,6 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
 
   BENCHMARK_CONV(f32_gemm_4x8__aarch64_neonfma_cortex_a75)
 #endif  // XNN_ARCH_ARM64
-
-#if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
-  static void f32_gemm_6x8__psimd_loadsplat(benchmark::State& state, const char* net) {
-    Im2ColGEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_6x8__psimd_loadsplat, 6, 8, 1, 1);
-  }
-
-  BENCHMARK_CONV(f32_gemm_6x8__psimd_loadsplat)
-#endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
 
 static void f32_gemm_2x4__scalar(benchmark::State& state, const char* net) {
   Im2ColGEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_2x4__scalar, 2, 4, 1, 1);

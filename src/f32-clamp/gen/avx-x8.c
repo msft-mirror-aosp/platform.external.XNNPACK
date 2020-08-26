@@ -21,10 +21,12 @@ void xnn_f32_clamp_ukernel__avx_x8(
     size_t n,
     const float* x,
     float* y,
-    const union xnn_f32_minmax_params params[restrict static 1])
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   const __m256 vy_min = _mm256_broadcast_ps((const __m128*) params->sse.min);
   const __m256 vy_max = _mm256_broadcast_ps((const __m128*) params->sse.max);
@@ -38,16 +40,6 @@ void xnn_f32_clamp_ukernel__avx_x8(
     vacc01234567 = _mm256_min_ps(vacc01234567, vy_max);
 
     _mm256_storeu_ps(y, vacc01234567);
-    y += 8;
-  }
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
-    __m256 vacc = _mm256_loadu_ps(x);
-    x += 8;
-
-    vacc = _mm256_max_ps(vacc, vy_min);
-    vacc = _mm256_min_ps(vacc, vy_max);
-
-    _mm256_storeu_ps(y, vacc);
     y += 8;
   }
   if XNN_UNLIKELY(n != 0) {

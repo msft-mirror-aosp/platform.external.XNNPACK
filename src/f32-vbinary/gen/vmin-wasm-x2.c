@@ -19,10 +19,13 @@ void xnn_f32_vmin_ukernel__wasm_x2(
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_default_params params[restrict static 1])
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
 
   for (; n >= 2 * sizeof(float); n -= 2 * sizeof(float)) {
@@ -36,6 +39,7 @@ void xnn_f32_vmin_ukernel__wasm_x2(
 
     float vy0 = __builtin_wasm_min_f32(va0, vb0);
     float vy1 = __builtin_wasm_min_f32(va1, vb1);
+
 
 
     y[0] = vy0;

@@ -30,6 +30,9 @@ static void SpMMBenchmark(benchmark::State& state,
     state.SkipWithError("cpuinfo initialization failed");
     return;
   }
+  if (!benchmark::utils::CheckNEONFP16ARITH(state)) {
+    return;
+  }
 
   const size_t mc = state.range(0);
   const size_t nc = state.range(1);
@@ -129,7 +132,7 @@ static void SpMMBenchmark(benchmark::State& state,
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   std::fill(c.begin(), c.end(), nanf(""));
 
-  xnn_f16_output_params output_params{
+  xnn_f16_scaleminmax_params params{
     0x3C00 /* 1.0 */, 0x7C00 /* inf */, 0xFC00 /* -inf */};
 
   size_t buffer_index = 0;
@@ -149,7 +152,7 @@ static void SpMMBenchmark(benchmark::State& state,
       dmap.data() + buffer_index * dmap_elements,
       nmap.data() + buffer_index * nmap_elements,
       c.data() + buffer_index * c_elements,
-      &output_params);
+      &params);
   }
 
   state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();

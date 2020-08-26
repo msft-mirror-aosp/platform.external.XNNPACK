@@ -19,6 +19,16 @@ extern "C" {
 #endif
 
 
+#define DECLARE_F16_CLAMP_UKERNEL_FUNCTION(fn_name)   \
+  XNN_INTERNAL void fn_name(                          \
+      size_t n,                                       \
+      const void* x,                                  \
+      void* y,                                        \
+      const struct xnn_f16_minmax_params* params);
+
+DECLARE_F16_CLAMP_UKERNEL_FUNCTION(xnn_f16_clamp_ukernel__neonfp16arith_x8)
+DECLARE_F16_CLAMP_UKERNEL_FUNCTION(xnn_f16_clamp_ukernel__neonfp16arith_x16)
+
 #define DECLARE_F32_CLAMP_UKERNEL_FUNCTION(fn_name)   \
   XNN_INTERNAL void fn_name(                          \
       size_t n,                                       \
@@ -34,8 +44,10 @@ DECLARE_F32_CLAMP_UKERNEL_FUNCTION(xnn_f32_clamp_ukernel__avx_x8)
 DECLARE_F32_CLAMP_UKERNEL_FUNCTION(xnn_f32_clamp_ukernel__avx_x16)
 DECLARE_F32_CLAMP_UKERNEL_FUNCTION(xnn_f32_clamp_ukernel__avx512f_x16)
 DECLARE_F32_CLAMP_UKERNEL_FUNCTION(xnn_f32_clamp_ukernel__avx512f_x32)
-DECLARE_F32_CLAMP_UKERNEL_FUNCTION(xnn_f32_clamp_ukernel__psimd_x4)
-DECLARE_F32_CLAMP_UKERNEL_FUNCTION(xnn_f32_clamp_ukernel__psimd_x8)
+DECLARE_F32_CLAMP_UKERNEL_FUNCTION(xnn_f32_clamp_ukernel__wasmsimd_arm_x4)
+DECLARE_F32_CLAMP_UKERNEL_FUNCTION(xnn_f32_clamp_ukernel__wasmsimd_arm_x8)
+DECLARE_F32_CLAMP_UKERNEL_FUNCTION(xnn_f32_clamp_ukernel__wasmsimd_x86_x4)
+DECLARE_F32_CLAMP_UKERNEL_FUNCTION(xnn_f32_clamp_ukernel__wasmsimd_x86_x8)
 DECLARE_F32_CLAMP_UKERNEL_FUNCTION(xnn_f32_clamp_ukernel__wasm_x1)
 DECLARE_F32_CLAMP_UKERNEL_FUNCTION(xnn_f32_clamp_ukernel__wasm_x2)
 DECLARE_F32_CLAMP_UKERNEL_FUNCTION(xnn_f32_clamp_ukernel__wasm_x4)

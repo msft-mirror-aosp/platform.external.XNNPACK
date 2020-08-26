@@ -21,10 +21,13 @@ void xnn_f32_vmaxc_ukernel__avx512f_x32(
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_default_params params[restrict static 1])
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
 
   const __m512 vb = _mm512_set1_ps(*b);
@@ -35,6 +38,7 @@ void xnn_f32_vmaxc_ukernel__avx512f_x32(
 
     __m512 vy0123456789ABCDEF = _mm512_max_ps(va0123456789ABCDEF, vb);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_max_ps(vaGHIJKLMNOPQRSTUV, vb);
+
 
 
     _mm512_storeu_ps(y, vy0123456789ABCDEF);

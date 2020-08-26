@@ -20,10 +20,12 @@ void xnn_f32_clamp_ukernel__avx512f_x16(
     size_t n,
     const float* x,
     float* y,
-    const union xnn_f32_minmax_params params[restrict static 1])
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   const __m512 vy_min = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.min));
   const __m512 vy_max = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.max));
@@ -37,16 +39,6 @@ void xnn_f32_clamp_ukernel__avx512f_x16(
     vacc0123456789ABCDEF = _mm512_min_ps(vacc0123456789ABCDEF, vy_max);
 
     _mm512_storeu_ps(y, vacc0123456789ABCDEF);
-    y += 16;
-  }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    __m512 vacc = _mm512_loadu_ps(x);
-    x += 16;
-
-    vacc = _mm512_max_ps(vacc, vy_min);
-    vacc = _mm512_min_ps(vacc, vy_max);
-
-    _mm512_storeu_ps(y, vacc);
     y += 16;
   }
   if XNN_UNLIKELY(n != 0) {

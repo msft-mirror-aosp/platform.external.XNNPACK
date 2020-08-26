@@ -57,6 +57,10 @@ DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_spmm_minmax_ukernel_8x2__scalar
 DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_spmm_minmax_ukernel_8x4__scalar)
 DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_spmm_minmax_ukernel_8x1__scalar_pipelined)
 DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_spmm_minmax_ukernel_8x1__sse)
+DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_spmm_minmax_ukernel_16x1__sse)
+DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_spmm_minmax_ukernel_4x1__psimd)
+DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_spmm_minmax_ukernel_8x1__psimd)
+DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_spmm_minmax_ukernel_16x1__psimd)
 
 #define DECLARE_F16_SPMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                              \
@@ -67,7 +71,7 @@ DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_spmm_minmax_ukernel_8x1__sse)
     const int32_t* dmap,                                  \
     const uint32_t* nmap,                                 \
     void* c,                                              \
-    const struct xnn_f16_output_params* params);
+    const struct xnn_f16_scaleminmax_params* params);
 
 DECLARE_F16_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith)
 DECLARE_F16_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_unroll2)

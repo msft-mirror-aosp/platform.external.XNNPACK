@@ -10,6 +10,7 @@
 #include <cfloat>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <random>
 #include <vector>
 
@@ -26,8 +27,8 @@
 #endif  // BENCHMARK_TENSORFLOW_LITE
 #include "bench/utils.h"
 
-
-static void xnnpack_average_pooling_q8(benchmark::State& state, const char* net) {
+#ifndef XNN_NO_QU8_OPERATORS
+static void xnnpack_average_pooling_qu8(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
   const size_t input_height = state.range(1);
   const size_t input_width = state.range(2);
@@ -38,7 +39,7 @@ static void xnnpack_average_pooling_q8(benchmark::State& state, const char* net)
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
+  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
   const size_t output_height = (2 * padding_size + input_height - pooling_size) / stride + 1;
   const size_t output_width = (2 * padding_size + input_width - pooling_size) / stride + 1;
@@ -55,7 +56,7 @@ static void xnnpack_average_pooling_q8(benchmark::State& state, const char* net)
   }
 
   xnn_operator_t pooling_op = nullptr;
-  status = xnn_create_average_pooling2d_nhwc_q8(
+  status = xnn_create_average_pooling2d_nhwc_qu8(
     padding_size, padding_size, padding_size, padding_size,
     pooling_size, pooling_size,
     stride, stride,
@@ -69,7 +70,7 @@ static void xnnpack_average_pooling_q8(benchmark::State& state, const char* net)
     return;
   }
 
-  status = xnn_setup_average_pooling2d_nhwc_q8(
+  status = xnn_setup_average_pooling2d_nhwc_qu8(
     pooling_op,
     batch_size, input_height, input_width,
     input.data(), output.data(),
@@ -101,6 +102,7 @@ static void xnnpack_average_pooling_q8(benchmark::State& state, const char* net)
       batch_size * (input_height * input_width + output_height * output_width) * channels * sizeof(uint8_t),
     benchmark::Counter::kIsRate);
 }
+#endif  // XNN_NO_QU8_OPERATORS
 
 static void xnnpack_average_pooling_f32(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
@@ -391,12 +393,14 @@ BENCHMARK_CAPTURE(tflite_average_pooling_f32, shufflenet_v1_g4, "ShuffleNet v1 (
 BENCHMARK_CAPTURE(tflite_average_pooling_f32, shufflenet_v1_g8, "ShuffleNet v1 (8 groups)")->Apply(ShuffleNetV1G8)->UseRealTime();
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
-BENCHMARK_CAPTURE(xnnpack_average_pooling_q8, imagenet, "ImageNet")->Apply(ImageNet)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_average_pooling_q8, shufflenet_v1_g1, "ShuffleNet v1 (1 group)")->Apply(ShuffleNetV1G1)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_average_pooling_q8, shufflenet_v1_g2, "ShuffleNet v1 (2 groups)")->Apply(ShuffleNetV1G2)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_average_pooling_q8, shufflenet_v1_g3, "ShuffleNet v1 (3 groups)")->Apply(ShuffleNetV1G3)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_average_pooling_q8, shufflenet_v1_g4, "ShuffleNet v1 (4 groups)")->Apply(ShuffleNetV1G4)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_average_pooling_q8, shufflenet_v1_g8, "ShuffleNet v1 (8 groups)")->Apply(ShuffleNetV1G8)->UseRealTime();
+#ifndef XNN_NO_QU8_OPERATORS
+BENCHMARK_CAPTURE(xnnpack_average_pooling_qu8, imagenet, "ImageNet")->Apply(ImageNet)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_average_pooling_qu8, shufflenet_v1_g1, "ShuffleNet v1 (1 group)")->Apply(ShuffleNetV1G1)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_average_pooling_qu8, shufflenet_v1_g2, "ShuffleNet v1 (2 groups)")->Apply(ShuffleNetV1G2)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_average_pooling_qu8, shufflenet_v1_g3, "ShuffleNet v1 (3 groups)")->Apply(ShuffleNetV1G3)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_average_pooling_qu8, shufflenet_v1_g4, "ShuffleNet v1 (4 groups)")->Apply(ShuffleNetV1G4)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_average_pooling_qu8, shufflenet_v1_g8, "ShuffleNet v1 (8 groups)")->Apply(ShuffleNetV1G8)->UseRealTime();
+#endif  // XNN_NO_QU8_OPERATORS
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

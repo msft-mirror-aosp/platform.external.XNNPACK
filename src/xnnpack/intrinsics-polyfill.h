@@ -5,18 +5,21 @@
 
 #pragma once
 
+#include <xnnpack/common.h>
+
 
 #ifdef __AVX512F__
 #include <immintrin.h>
 
-// GCC pre-7, Clang pre-8, Apple Clang pre-11, and ICC pre-18
+// GCC pre-7, Clang pre-8, Android NDK Clang pre-8.0.7, Apple Clang pre-11, and ICC pre-18
 #if (defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && (__GNUC__ < 7)) || \
     (defined(__clang__) && !defined(__apple_build_version__) && (__clang_major__ < 8)) || \
+    (defined(__clang__) && defined(__ANDROID__) && (__clang_major__ == 8) && (__clang_minor__ == 0) && (__clang_patchlevel__ < 7)) || \
     (defined(__clang__) && defined(__apple_build_version__) && (__apple_build_version__ < 11000000)) || \
     (defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1800))
 
-static inline __mmask16 __attribute__((__gnu_inline__, __always_inline__, __artificial__))
-_cvtu32_mask16(unsigned int mask) {
+static XNN_INTRINSIC
+__mmask16 _cvtu32_mask16(unsigned int mask) {
   return (__mmask16) mask;
 }
 
@@ -27,8 +30,8 @@ _cvtu32_mask16(unsigned int mask) {
     (defined(__clang__) && (__clang_major__ < 4)) || \
     (defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1800))
 
-static inline float __attribute__((__gnu_inline__, __always_inline__, __artificial__))
-_mm512_reduce_add_ps(__m512 v) {
+static XNN_INTRINSIC
+float _mm512_reduce_add_ps(__m512 v) {
 #if __AVX512DQ__
   const __m256 sum2 = _mm256_add_ps(_mm512_castps512_ps256(v), _mm512_extractf32x8_ps(v, 1));
 #else
@@ -40,8 +43,8 @@ _mm512_reduce_add_ps(__m512 v) {
   return _mm_cvtss_f32(sum16);
 }
 
-static inline float __attribute__((__gnu_inline__, __always_inline__, __artificial__))
-_mm512_reduce_max_ps(__m512 v) {
+static XNN_INTRINSIC
+float _mm512_reduce_max_ps(__m512 v) {
 #if __AVX512DQ__
   const __m256 sum2 = _mm256_max_ps(_mm512_castps512_ps256(v), _mm512_extractf32x8_ps(v, 1));
 #else

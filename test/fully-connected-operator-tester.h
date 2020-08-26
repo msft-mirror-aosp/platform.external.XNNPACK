@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <random>
 #include <vector>
 
@@ -128,11 +129,11 @@ class FullyConnectedOperatorTester {
     return this->iterations_;
   }
 
-  void TestQ8() const {
+  void TestQU8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
-    auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
+    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
       (batch_size() - 1) * input_stride() + input_channels());
@@ -203,7 +204,7 @@ class FullyConnectedOperatorTester {
       xnn_operator_t fully_connected_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
-        xnn_create_fully_connected_nc_q8(
+        xnn_create_fully_connected_nc_qu8(
           input_channels(), output_channels(),
           input_stride(), output_stride(),
           input_zero_point, 1.0f /* input scale */,
@@ -217,7 +218,7 @@ class FullyConnectedOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fully_connected_op(fully_connected_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_fully_connected_nc_q8(
+        xnn_setup_fully_connected_nc_qu8(
           fully_connected_op,
           batch_size(),
           input.data(), output.data(),

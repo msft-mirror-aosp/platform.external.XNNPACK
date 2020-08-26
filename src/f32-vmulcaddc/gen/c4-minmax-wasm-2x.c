@@ -13,7 +13,7 @@
 #include <xnnpack/vmulcaddc.h>
 
 
-void xnn_f32_vmulcaddc_ukernel_c4__wasm_2x(
+void xnn_f32_vmulcaddc_minmax_ukernel_c4__wasm_2x(
     size_t rows,
     size_t channels,
     const float*restrict input,
@@ -21,7 +21,7 @@ void xnn_f32_vmulcaddc_ukernel_c4__wasm_2x(
     const float*restrict weights,
     float*restrict output,
     size_t output_stride,
-    const union xnn_f32_minmax_params params[restrict static 1])
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
   assert(channels != 0);
