@@ -23,6 +23,9 @@ void xnn_f32_vmin_ukernel__wasm_x4(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
 
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
@@ -42,6 +45,7 @@ void xnn_f32_vmin_ukernel__wasm_x4(
     float vy1 = __builtin_wasm_min_f32(va1, vb1);
     float vy2 = __builtin_wasm_min_f32(va2, vb2);
     float vy3 = __builtin_wasm_min_f32(va3, vb3);
+
 
 
     y[0] = vy0;

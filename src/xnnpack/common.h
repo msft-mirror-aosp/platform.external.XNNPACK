@@ -45,12 +45,6 @@
   #define XNN_ARCH_PPC64 0
 #endif
 
-#if defined(__asmjs__)
-  #define XNN_ARCH_ASMJS 1
-#else
-  #define XNN_ARCH_ASMJS 0
-#endif
-
 #if defined(__wasm__)
   #if defined(__wasm_simd128__)
     #define XNN_ARCH_WASMSIMD 1
@@ -120,6 +114,10 @@
 #endif
 
 
+#ifndef XNN_TEST_MODE
+  #define XNN_TEST_MODE 0
+#endif
+
 #ifndef XNN_MAX_UARCH_TYPES
   #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && !XNN_PLATFORM_IOS
     #define XNN_MAX_UARCH_TYPES 3
@@ -129,6 +127,18 @@
 #endif
 
 #define XNN_UARCH_DEFAULT 0
+
+#if defined(__has_builtin)
+  #define XNN_COMPILER_HAS_BUILTIN(builtin) __has_builtin(builtin)
+#else
+  #define XNN_COMPILER_HAS_BUILTIN(builtin) 0
+#endif
+
+#if defined(__has_feature)
+  #define XNN_COMPILER_HAS_FEATURE(builtin) __has_feature(builtin)
+#else
+  #define XNN_COMPILER_HAS_FEATURE(builtin) 0
+#endif
 
 #if defined(__GNUC__)
   #if defined(__clang__) || (__GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 5)
@@ -166,25 +176,18 @@
   #define XNN_UNLIKELY(condition) (!!(condition))
 #endif
 
-// TODO - __builtin_expect_with_probability for GCC 9+
-#if defined(__clang__)
-  #if __has_builtin(__builtin_unpredictable)
-    #define XNN_UNPREDICTABLE(condition) (__builtin_unpredictable(!!(condition)))
-  #else
-    #define XNN_UNPREDICTABLE(condition) (!!(condition))
-  #endif
+#if XNN_COMPILER_HAS_BUILTIN(__builtin_unpredictable)
+  #define XNN_UNPREDICTABLE(condition) (__builtin_unpredictable(!!(condition)))
+#elif defined(__GNUC__) && (__GNUC__ >= 9) && !defined(__INTEL_COMPILER)
+  #define XNN_UNPREDICTABLE(condition) (__builtin_expect_with_probability(!!(condition), 0, 0.5))
 #else
   #define XNN_UNPREDICTABLE(condition) (!!(condition))
 #endif
 
-#if defined(__has_feature)
-  #if __has_feature(thread_sanitizer)
-    #define XNN_DISABLE_TSAN __attribute__((__no_sanitize__("thread")))
-  #else
-    #define XNN_DISABLE_TSAN
-  #endif
+#if XNN_COMPILER_HAS_FEATURE(thread_sanitizer)
+  #define XNN_DISABLE_TSAN __attribute__((__no_sanitize__("thread")))
 #else
-    #define XNN_DISABLE_TSAN
+  #define XNN_DISABLE_TSAN
 #endif
 
 #if defined(__GNUC__)

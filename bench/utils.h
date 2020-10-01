@@ -31,6 +31,14 @@ void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark);
 
 typedef bool (*IsaCheckFunction)(benchmark::State& state);
 
+// Check if either ARM VFPv2 or VFPv3 extension is supported.
+// If VFP is unsupported, report error in benchmark state, and return false.
+bool CheckVFP(benchmark::State& state);
+
+// Check if ARM NEON-FP16-ARITH extension is supported.
+// If NEON-FP16-ARITH is unsupported, report error in benchmark state, and return false.
+bool CheckNEONFP16ARITH(benchmark::State& state);
+
 // Check if ARM NEON extension is supported.
 // If NEON is unsupported, report error in benchmark state, and return false.
 bool CheckNEON(benchmark::State& state);
