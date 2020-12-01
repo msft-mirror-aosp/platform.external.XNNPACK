@@ -76,7 +76,6 @@ enum xnn_status xnn_create_resize_bilinear2d_nhwc_f32(
   resize_op->output_pixel_stride = output_pixel_stride;
 
   resize_op->type = xnn_operator_type_resize_bilinear_nhwc_f32;
-  resize_op->ukernel.type = xnn_ukernel_type_unpooling;
   resize_op->flags = flags;
 
   resize_op->state = xnn_run_state_invalid;
@@ -178,7 +177,7 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_f32(
       output_width != resize_op->last_output_width)
   {
     const uint32_t flags = resize_op->flags;
-    xnn_indirection_init_resize_bilinear2d_f32(
+    xnn_indirection_init_resize_bilinear2d_hwc_f32(
       input_pixel_stride_in_bytes,
       input_height, input_width,
       output_height, output_width,
