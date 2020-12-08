@@ -127,7 +127,6 @@ struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph)
 #define XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC 4
 #define XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER 8
 
-#if XNN_ENABLE_SPARSE
 uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* node) {
   switch (node->type) {
     case xnn_node_type_convolution_2d:
@@ -208,6 +207,7 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
           return 0;
       }
     case xnn_node_type_global_average_pooling_2d:
+    case xnn_node_type_depth_to_space:
       return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW | XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC;
     case xnn_node_type_add2:
     case xnn_node_type_multiply2:
@@ -246,6 +246,9 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
       }
 
       return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW;
+    case xnn_node_type_static_resize_bilinear_2d:
+      return subgraph->values[node->inputs[0]].shape.dim[1] > 1 &&
+             subgraph->values[node->inputs[0]].shape.dim[2] > 1 ? XNN_LAYOUT_FLAG_COMPATIBLE_NCHW : 0;
     case xnn_node_type_abs:
     case xnn_node_type_bankers_rounding:
     case xnn_node_type_ceiling:
@@ -264,7 +267,7 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
   }
 }
 
-static void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
+void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
 {
   // Convert parts of the subgraph to NCHW for sparse inference
   // Step 1: detect NCHW-compatible Nodes
@@ -281,7 +284,9 @@ static void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
       node->layout_flags & XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC ? "yes" : "no");
   }
 
-  // Run Shiloach-Vishkin connected components algorithm
+  // Run Shiloach-Vishkin connected components algorithm i.e. find all
+  // XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC nodes and set them as cluster leaders
+  // to all the producer nodes
   bool update = false;
   for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
     struct xnn_node* node = &subgraph->nodes[n];
@@ -317,6 +322,13 @@ static void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
       }
     }
   }
+  // No NCHW2NHWC compatible nodes have been found thus the graph rewriting
+  // pratically cannot happen.
+  if (!update) {
+    return;
+  }
+  // Propagate the cluster leader to other nodes in the graph untill all the
+  // nodes in the cluster is not updated
   while (update) {
     update = false;
     for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
@@ -434,7 +446,6 @@ static void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
     }
   }
 }
-#endif  // XNN_ENABLE_SPARSE
 
 enum xnn_status xnn_subgraph_optimize(
   xnn_subgraph_t subgraph,
@@ -561,9 +572,9 @@ enum xnn_status xnn_subgraph_optimize(
               assert(consumer->inputs[0] == producer->outputs[0]);
 
               consumer->params.convolution_2d.input_padding_top    += producer->params.static_pad.pre_paddings[1];
-              consumer->params.convolution_2d.input_padding_right  += producer->params.static_pad.pre_paddings[2];
+              consumer->params.convolution_2d.input_padding_right  += producer->params.static_pad.post_paddings[2];
               consumer->params.convolution_2d.input_padding_bottom += producer->params.static_pad.post_paddings[1];
-              consumer->params.convolution_2d.input_padding_left   += producer->params.static_pad.post_paddings[2];
+              consumer->params.convolution_2d.input_padding_left   += producer->params.static_pad.pre_paddings[2];
 
               consumer->inputs[0] = producer->inputs[0];
 
@@ -587,11 +598,11 @@ enum xnn_status xnn_subgraph_optimize(
               consumer->params.depthwise_convolution_2d.input_padding_top +=
                 producer->params.static_pad.pre_paddings[1];
               consumer->params.depthwise_convolution_2d.input_padding_right +=
-                producer->params.static_pad.pre_paddings[2];
+                producer->params.static_pad.post_paddings[2];
               consumer->params.depthwise_convolution_2d.input_padding_bottom +=
                 producer->params.static_pad.post_paddings[1];
               consumer->params.depthwise_convolution_2d.input_padding_left +=
-                producer->params.static_pad.post_paddings[2];
+                producer->params.static_pad.pre_paddings[2];
 
               consumer->inputs[0] = producer->inputs[0];
 

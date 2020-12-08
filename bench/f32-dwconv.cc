@@ -56,7 +56,7 @@ static void DWConvBenchmark(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
 
   const size_t effective_kernel_height = (kernel_height - 1) * dilation + 1;
   const size_t effective_kernel_width = (kernel_width - 1) * dilation + 1;
@@ -100,7 +100,6 @@ static void DWConvBenchmark(benchmark::State& state,
   convolution_op.input              = a.data();
   convolution_op.input_pixel_stride = channels;
   convolution_op.zero_buffer        = z.data();
-  convolution_op.batch_size         = 1;
   convolution_op.input_height       = input_height;
   convolution_op.input_width        = input_width;
   convolution_op.output_height      = output_height;
@@ -114,7 +113,7 @@ static void DWConvBenchmark(benchmark::State& state,
   convolution_op.padding_top        = padding_top;
   convolution_op.padding_left       = padding_left;
 
-  xnn_indirection_init_dwconv2d(&convolution_op, 0, step_height, step_width, 2 /* log2(sizeof(float)) */);
+  xnn_indirection_init_dwconv2d(&convolution_op, step_height, step_width, 2 /* log2(sizeof(float)) */);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(i.cbegin(), i.cbegin() + i_elements, i.begin() + n * i_elements);
   }
@@ -132,7 +131,7 @@ static void DWConvBenchmark(benchmark::State& state,
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
-    for (uint32_t y = 0; y < output_height; y++) {
+    for (size_t y = 0; y < output_height; y++) {
       dwconv(channels, output_width,
         i.data() + buffer_index * i_elements + step_height * y,
         w.data() + buffer_index * w_elements,

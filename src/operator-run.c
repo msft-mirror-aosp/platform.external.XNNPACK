@@ -78,15 +78,16 @@ void xnn_compute_spmm(
   context->ukernel(
       mr_block_size,
       context->n,
-      (const void*) ((uintptr_t) context->a + batch_index * context->batched_a_stride + mr_block_start * sizeof(float)),
-      context->packed_weights,
+      (const void*) ((uintptr_t) context->input + batch_index * context->batched_input_stride + mr_block_start),
+      context->nonzero_weights,
       context->input_increments,
       context->output_channel_nonzeros,
-      (void*) ((uintptr_t) context->c + batch_index * context->batched_c_stride + mr_block_start * sizeof(float)),
+      (void*) ((uintptr_t) context->output + batch_index * context->batched_output_stride + mr_block_start),
+      context->scaled_m,
       &context->params);
 }
 
-void xnn_compute_grouped_igemm(
+void xnn_compute_grouped_batch_igemm(
     const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,
     size_t group_index,
@@ -113,7 +114,33 @@ void xnn_compute_grouped_igemm(
       &context->params);
 }
 
-void xnn_compute_igemm(
+void xnn_compute_grouped_igemm(
+    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t group_index,
+    size_t mr_block_start,
+    size_t nr_block_start,
+    size_t mr_block_size,
+    size_t nr_block_size)
+{
+  const size_t ks        = context->ks;
+  const size_t cm_stride = context->cm_stride;
+
+  context->ukernel.function[XNN_UARCH_DEFAULT](
+      mr_block_size,
+      nr_block_size,
+      context->kc,
+      context->ks_scaled,
+      (const void**) ((uintptr_t) context->indirect_a + mr_block_start * ks * sizeof(void*)),
+      (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride + group_index * context->gw_stride),
+      (void*) ((uintptr_t) context->c + group_index * context->gc_stride + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
+      cm_stride,
+      context->cn_stride,
+      context->a_offset + group_index * context->ga_stride,
+      context->zero,
+      &context->params);
+}
+
+void xnn_compute_batch_igemm(
     const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,
     size_t mr_block_start,
@@ -135,6 +162,31 @@ void xnn_compute_igemm(
       cm_stride,
       context->cn_stride,
       context->a_offset + batch_index * context->ba_stride,
+      context->zero,
+      &context->params);
+}
+
+void xnn_compute_igemm(
+    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t mr_block_start,
+    size_t nr_block_start,
+    size_t mr_block_size,
+    size_t nr_block_size)
+{
+  const size_t ks        = context->ks;
+  const size_t cm_stride = context->cm_stride;
+
+  context->ukernel.function[XNN_UARCH_DEFAULT](
+      mr_block_size,
+      nr_block_size,
+      context->kc,
+      context->ks_scaled,
+      (const void**) ((uintptr_t) context->indirect_a + mr_block_start * ks * sizeof(void*)),
+      (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride),
+      (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
+      cm_stride,
+      context->cn_stride,
+      context->a_offset,
       context->zero,
       &context->params);
 }
@@ -315,18 +367,20 @@ void xnn_compute_conv2d_hwc2chw(
 
 void xnn_compute_dwconv_unipass(
     const struct dwconv_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index,
     size_t output_y)
 {
+  const void** indirect_input =
+    (const void**) ((uintptr_t) context->indirect_input + output_y * context->indirect_input_height_stride);
+  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;
+  void* output = (void*) ((uintptr_t) context->output +
+    batch_index * context->output_batch_stride + output_y * context->output_height_stride);
+
   context->unipass_ukernel(
-    context->groups,
-    context->output_width,
-    context->indirection_buffer + output_y * context->indirection_buffer_row_stride,
-    context->packed_weights,
-    (void*) ((uintptr_t) context->output + output_y * context->output_row_stride),
-    context->indirection_buffer_col_stride,
-    context->output_col_increment,
-    context->input_offset,
-    context->zero,
+    context->groups, context->output_width,
+    indirect_input, context->packed_weights, output,
+    context->indirect_input_width_stride, context->output_increment,
+    input_offset, context->zero,
     &context->params);
 }
 
@@ -343,11 +397,66 @@ void xnn_compute_dwconv2d_chw(
     context->zero,
     (void*) ((uintptr_t) context->output + channel * context->output_channel_stride + batch_index * context->output_batch_stride),
     context->input_padding_top,
-    context->input_tuple_stride,
-    context->output_tuple_stride,
-    context->input_pixel_stride,
-    context->output_pixel_stride,
     &context->params);
+}
+
+void xnn_compute_depthtospace2d_hwc_contiguous(
+    const struct depthtospace2d_hwc_context* context,
+    size_t batch_input_y,
+    size_t input_x,
+    size_t block_y)
+{
+  const size_t input_width = context->input_width;
+  const size_t elements = context->elements;
+  const void* input = (const void*) ((uintptr_t) context->input +
+    (batch_input_y * input_width + input_x) * context->input_width_stride + block_y * elements);
+  void* output = (void*) ((uintptr_t) context->output +
+    ((batch_input_y * context->block_size + block_y) * input_width + input_x) * elements);
+
+  context->ukernel(
+    elements,
+    input,
+    output,
+    NULL);
+}
+
+void xnn_compute_depthtospace2d_hwc_strided(
+    const struct depthtospace2d_hwc_context* context,
+    size_t batch_input_y,
+    size_t input_x,
+    size_t block_y,
+    size_t block_x)
+{
+  const size_t block_size = context->block_size;
+  const size_t elements = context->elements;
+  const void* input = (const void*) ((uintptr_t) context->input +
+    batch_input_y * context->input_height_stride + input_x * context->input_width_stride + (block_y * block_size + block_x) * elements);
+  void* output = (void*) ((uintptr_t) context->output +
+    (batch_input_y * block_size + block_y) * context->output_height_stride +
+    (input_x * block_size + block_x) * context->output_width_stride);
+
+  context->ukernel(
+    elements,
+    input,
+    output,
+    NULL);
+}
+
+void xnn_compute_depthtospace2d_chw2hwc(
+    const struct depthtospace2d_chw2hwc_context* context,
+    size_t batch_index)
+{
+  context->ukernel(
+    context->output_channels,
+    context->input_height,
+    context->input_width,
+    context->block_size,
+    (const void*) ((uintptr_t) context->input + batch_index * context->input_batch_stride),
+    (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride),
+    context->input_channel_stride,
+    context->input_height_stride,
+    context->output_height_stride,
+    context->output_width_stride);
 }
 
 void xnn_compute_argmax_pooling_unipass(
@@ -590,6 +699,26 @@ void xnn_compute_resize_bilinear(
     context->output_pixel_stride - context->scaled_channels);
 }
 
+void xnn_compute_resize_bilinear_chw(
+    const struct resize_bilinear_chw_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index,
+    size_t channel_start,
+    size_t channel_range)
+{
+  void* output =
+    (void*) ((uintptr_t) context->output + channel_start * context->output_channel_stride + batch_index * context->output_batch_stride);
+  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride + channel_start * context->input_channel_stride;
+
+  context->ukernel(
+    context->output_pixels,
+    channel_range,
+    context->indirect_input,
+    input_offset,
+    context->packed_weights,
+    output,
+    context->input_channel_stride);
+}
+
 void xnn_compute_prelu(
     const struct prelu_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_start,
@@ -828,7 +957,7 @@ void xnn_compute_vmulcaddc(
         &context->params);
   }
 
-  void xnn_compute_hmp_grouped_igemm(
+  void xnn_compute_hmp_grouped_batch_igemm(
       const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
       uint32_t uarch_index,
       size_t batch_index,
@@ -856,7 +985,34 @@ void xnn_compute_vmulcaddc(
         &context->params);
   }
 
-  void xnn_compute_hmp_igemm(
+  void xnn_compute_hmp_grouped_igemm(
+      const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+      uint32_t uarch_index,
+      size_t group_index,
+      size_t mr_block_start,
+      size_t nr_block_start,
+      size_t mr_block_size,
+      size_t nr_block_size)
+  {
+    const size_t ks        = context->ks;
+    const size_t cm_stride = context->cm_stride;
+
+    context->ukernel.function[uarch_index](
+        mr_block_size,
+        nr_block_size,
+        context->kc,
+        context->ks_scaled,
+        (const void**) ((uintptr_t) context->indirect_a + mr_block_start * ks * sizeof(void*)),
+        (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride + group_index * context->gw_stride),
+        (void*) ((uintptr_t) context->c + group_index * context->gc_stride + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
+        cm_stride,
+        context->cn_stride,
+        context->a_offset + group_index * context->ga_stride,
+        context->zero,
+        &context->params);
+  }
+
+  void xnn_compute_batch_hmp_igemm(
       const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
       uint32_t uarch_index,
       size_t batch_index,
@@ -879,6 +1035,32 @@ void xnn_compute_vmulcaddc(
         cm_stride,
         context->cn_stride,
         context->a_offset + batch_index * context->ba_stride,
+        context->zero,
+        &context->params);
+  }
+
+  void xnn_compute_hmp_igemm(
+      const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+      uint32_t uarch_index,
+      size_t mr_block_start,
+      size_t nr_block_start,
+      size_t mr_block_size,
+      size_t nr_block_size)
+  {
+    const size_t ks        = context->ks;
+    const size_t cm_stride = context->cm_stride;
+
+    context->ukernel.function[uarch_index](
+        mr_block_size,
+        nr_block_size,
+        context->kc,
+        context->ks_scaled,
+        (const void**) ((uintptr_t) context->indirect_a + mr_block_start * ks * sizeof(void*)),
+        (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride),
+        (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
+        cm_stride,
+        context->cn_stride,
+        context->a_offset,
         context->zero,
         &context->params);
   }
@@ -958,6 +1140,17 @@ enum xnn_status xnn_run_operator(xnn_operator_t op, pthreadpool_t threadpool)
           op->compute.tile[0], op->compute.tile[1],
           PTHREADPOOL_FLAG_DISABLE_DENORMALS /* flags */);
       break;
+    case xnn_parallelization_type_3d:
+      assert(op->compute.range[0] != 0);
+      assert(op->compute.range[1] != 0);
+      assert(op->compute.range[2] != 0);
+      pthreadpool_parallelize_3d(
+          threadpool,
+          op->compute.task_3d,
+          &op->context,
+          op->compute.range[0], op->compute.range[1], op->compute.range[2],
+          PTHREADPOOL_FLAG_DISABLE_DENORMALS /* flags */);
+      break;
     case xnn_parallelization_type_3d_tile_2d:
       assert(op->compute.range[0] != 0);
       assert(op->compute.range[1] != 0);
@@ -970,6 +1163,18 @@ enum xnn_status xnn_run_operator(xnn_operator_t op, pthreadpool_t threadpool)
           &op->context,
           op->compute.range[0], op->compute.range[1], op->compute.range[2],
           op->compute.tile[0], op->compute.tile[1],
+          PTHREADPOOL_FLAG_DISABLE_DENORMALS /* flags */);
+      break;
+    case xnn_parallelization_type_4d:
+      assert(op->compute.range[0] != 0);
+      assert(op->compute.range[1] != 0);
+      assert(op->compute.range[2] != 0);
+      assert(op->compute.range[3] != 0);
+      pthreadpool_parallelize_4d(
+          threadpool,
+          op->compute.task_4d,
+          &op->context,
+          op->compute.range[0], op->compute.range[1], op->compute.range[2], op->compute.range[3],
           PTHREADPOOL_FLAG_DISABLE_DENORMALS /* flags */);
       break;
     case xnn_parallelization_type_4d_tile_2d:
