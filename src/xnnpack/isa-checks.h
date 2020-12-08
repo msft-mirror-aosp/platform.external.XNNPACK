@@ -38,6 +38,13 @@
     } \
   } while (0)
 
+#define TEST_REQUIRES_X86_SSSE3 \
+  do { \
+    if (!cpuinfo_initialize() || !cpuinfo_has_x86_ssse3()) { \
+      GTEST_SKIP(); \
+    } \
+  } while (0)
+
 #define TEST_REQUIRES_X86_SSE41 \
   do { \
     if (!cpuinfo_initialize() || !cpuinfo_has_x86_sse4_1()) { \
@@ -48,6 +55,13 @@
 #define TEST_REQUIRES_X86_AVX \
   do { \
     if (!cpuinfo_initialize() || !cpuinfo_has_x86_avx()) { \
+      GTEST_SKIP(); \
+    } \
+  } while (0)
+
+#define TEST_REQUIRES_X86_XOP \
+  do { \
+    if (!cpuinfo_initialize() || !cpuinfo_has_x86_xop()) { \
       GTEST_SKIP(); \
     } \
   } while (0)
@@ -69,6 +83,13 @@
 #define TEST_REQUIRES_X86_AVX512F \
   do { \
     if (!cpuinfo_initialize() || !cpuinfo_has_x86_avx512f()) { \
+      GTEST_SKIP(); \
+    } \
+  } while (0)
+
+#define TEST_REQUIRES_X86_AVX512SKX \
+  do { \
+    if (!cpuinfo_initialize() || !cpuinfo_has_x86_avx512f() || !cpuinfo_has_x86_avx512cd() || !cpuinfo_has_x86_avx512dq() || !cpuinfo_has_x86_avx512bw() || !cpuinfo_has_x86_avx512vl()) { \
       GTEST_SKIP(); \
     } \
   } while (0)
@@ -97,6 +118,13 @@
 #define TEST_REQUIRES_ARM_NEON_FP16_ARITH \
   do { \
     if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_fp16_arith()) { \
+      GTEST_SKIP(); \
+    } \
+  } while (0)
+
+#define TEST_REQUIRES_ARM_NEON_DOT \
+  do { \
+    if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_dot()) { \
       GTEST_SKIP(); \
     } \
   } while (0)
