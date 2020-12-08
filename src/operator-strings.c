@@ -24,6 +24,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Add (ND, F16)";
     case xnn_operator_type_add_nd_f32:
       return "Add (ND, F32)";
+    case xnn_operator_type_add_nd_qs8:
+      return "Add (ND, QS8)";
     case xnn_operator_type_argmax_pooling_nhwc_f32:
       return "ArgMax Pooling (NHWC, F32)";
     case xnn_operator_type_average_pooling_nhwc_f32:
@@ -48,6 +50,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Convolution (NHWC, F16)";
     case xnn_operator_type_convolution_nhwc_f32:
       return "Convolution (NHWC, F32)";
+    case xnn_operator_type_convolution_nhwc_qs8:
+      return "Convolution (NHWC, QS8)";
     case xnn_operator_type_convolution_nhwc_qu8:
       return "Convolution (NHWC, QU8)";
     case xnn_operator_type_convolution_nchw_f32:
@@ -58,6 +62,10 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Deconvolution (NHWC, F32)";
     case xnn_operator_type_deconvolution_nhwc_qu8:
       return "Deconvolution (NHWC, QU8)";
+    case xnn_operator_type_depth_to_space_nchw2nhwc_x32:
+      return "Depth To Space (NCHW2NHWC, X32)";
+    case xnn_operator_type_depth_to_space_nhwc_x32:
+      return "Depth To Space (NHWC, X32)";
     case xnn_operator_type_divide_nd_f32:
       return "Divide (ND, F32)";
     case xnn_operator_type_floor_nc_f32:
@@ -70,10 +78,14 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Global Average Pooling (NWC, F16)";
     case xnn_operator_type_global_average_pooling_nwc_f32:
       return "Global Average Pooling (NWC, F32)";
+    case xnn_operator_type_global_average_pooling_nwc_qs8:
+      return "Global Average Pooling (NWC, QS8)";
     case xnn_operator_type_global_average_pooling_nwc_qu8:
       return "Global Average Pooling (NWC, QU8)";
     case xnn_operator_type_global_average_pooling_ncw_f32:
       return "Global Average Pooling (NCW, F32)";
+    case xnn_operator_type_hardswish_nc_f16:
+      return "HardSwish (NC, F16)";
     case xnn_operator_type_hardswish_nc_f32:
       return "HardSwish (NC, F32)";
     case xnn_operator_type_leaky_relu_nc_f32:
@@ -88,6 +100,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Maximum (ND, F32)";
     case xnn_operator_type_minimum_nd_f32:
       return "Minimum (ND, F32)";
+    case xnn_operator_type_multiply_nd_f16:
+      return "Multiply (ND, F16)";
     case xnn_operator_type_multiply_nd_f32:
       return "Multiply (ND, F32)";
     case xnn_operator_type_negate_nc_f32:
@@ -96,6 +110,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "PReLU (NC, F32)";
     case xnn_operator_type_resize_bilinear_nhwc_f32:
       return "Resize Bilinear (NHWC, F32)";
+    case xnn_operator_type_resize_bilinear_nchw_f32:
+      return "Resize Bilinear (NCHW, F32)";
     case xnn_operator_type_sigmoid_nc_f32:
       return "Sigmoid (NC, F32)";
     case xnn_operator_type_sigmoid_nc_qu8:
