@@ -75,61 +75,6 @@ void xnn_indirection_init_conv2d(
   }
 }
 
-void xnn_indirection_init_dwconv2d(
-  xnn_operator_t op,
-  size_t batch_start,
-  size_t step_height,
-  size_t step_width,
-  uint32_t log2_element_size)
-{
-  const void** indirection_buffer = op->indirection_buffer;
-  const void* input               = op->input;
-  const size_t input_pixel_stride = op->input_pixel_stride << log2_element_size;
-  const void* zero                = op->zero_buffer;
-  const size_t batch_size         = op->batch_size;
-  const size_t input_height       = op->input_height;
-  const size_t input_width        = op->input_width;
-  const size_t output_height      = op->output_height;
-  const size_t output_width       = op->output_width;
-  const size_t kernel_height      = op->kernel_height;
-  const size_t kernel_width       = op->kernel_width;
-  const size_t stride_height      = op->stride_height;
-  const size_t stride_width       = op->stride_width;
-  const size_t dilation_height    = op->dilation_height;
-  const size_t dilation_width     = op->dilation_width;
-  const size_t input_padding_top  = op->padding_top;
-  const size_t input_padding_left = op->padding_left;
-
-  for (size_t batch_index = batch_start; batch_index < batch_size; batch_index++) {
-    for (size_t output_y = 0; output_y < output_height; output_y++) {
-      for (size_t kernel_y = 0; kernel_y < kernel_height; kernel_y++) {
-        const size_t input_y = output_y * stride_height + kernel_y * dilation_height - input_padding_top;
-        if (input_y < input_height) {
-          for (size_t output_x = 0; output_x < output_width; output_x++) {
-            for (size_t kernel_x = 0; kernel_x < kernel_width; kernel_x++) {
-              const size_t input_x = output_x * stride_width + kernel_x * dilation_width - input_padding_left;
-              const size_t index = (batch_index * output_height + output_y) * step_height + output_x * step_width * kernel_height + kernel_x * kernel_height + kernel_y;
-              if (input_x < input_width) {
-                indirection_buffer[index] =
-                  (const void*) ((uintptr_t) input + ((batch_index * input_height + input_y) * input_width + input_x) * input_pixel_stride);
-              } else {
-                indirection_buffer[index] = zero;
-              }
-            }
-          }
-        } else {
-          for (size_t output_x = 0; output_x < output_width; output_x++) {
-            for (size_t kernel_x = 0; kernel_x < kernel_width; kernel_x++) {
-              const size_t index = (batch_index * output_height + output_y) * step_height + output_x * step_width * kernel_height + kernel_x * kernel_height + kernel_y;
-              indirection_buffer[index] = zero;
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
 void xnn_indirection_init_deconv2d(
   xnn_operator_t op,
   size_t output_tile_size,
@@ -250,6 +195,57 @@ void xnn_indirection_init_subconv2d(
   }
 }
 
+void xnn_indirection_init_dwconv2d(
+  xnn_operator_t op,
+  size_t step_height,
+  size_t step_width,
+  uint32_t log2_element_size)
+{
+  const void** indirection_buffer = op->indirection_buffer;
+  const void* input               = op->input;
+  const size_t input_pixel_stride = op->input_pixel_stride << log2_element_size;
+  const void* zero                = op->zero_buffer;
+  const size_t input_height       = op->input_height;
+  const size_t input_width        = op->input_width;
+  const size_t output_height      = op->output_height;
+  const size_t output_width       = op->output_width;
+  const size_t kernel_height      = op->kernel_height;
+  const size_t kernel_width       = op->kernel_width;
+  const size_t stride_height      = op->stride_height;
+  const size_t stride_width       = op->stride_width;
+  const size_t dilation_height    = op->dilation_height;
+  const size_t dilation_width     = op->dilation_width;
+  const size_t input_padding_top  = op->padding_top;
+  const size_t input_padding_left = op->padding_left;
+
+  for (size_t output_y = 0; output_y < output_height; output_y++) {
+    for (size_t kernel_y = 0; kernel_y < kernel_height; kernel_y++) {
+      const size_t input_y = output_y * stride_height + kernel_y * dilation_height - input_padding_top;
+      if (input_y < input_height) {
+        for (size_t output_x = 0; output_x < output_width; output_x++) {
+          for (size_t kernel_x = 0; kernel_x < kernel_width; kernel_x++) {
+            const size_t input_x = output_x * stride_width + kernel_x * dilation_width - input_padding_left;
+            const size_t index = output_y * step_height + output_x * step_width * kernel_height + kernel_x * kernel_height + kernel_y;
+            if (input_x < input_width) {
+              indirection_buffer[index] =
+                (const void*) ((uintptr_t) input + (input_y * input_width + input_x) * input_pixel_stride);
+            } else {
+              indirection_buffer[index] = zero;
+            }
+          }
+        }
+      } else {
+        for (size_t output_x = 0; output_x < output_width; output_x++) {
+          for (size_t kernel_x = 0; kernel_x < kernel_width; kernel_x++) {
+            const size_t index = output_y * step_height + output_x * step_width * kernel_height + kernel_x * kernel_height + kernel_y;
+            indirection_buffer[index] = zero;
+          }
+        }
+      }
+    }
+  }
+}
+
 void xnn_indirection_init_maxpool2d(
   xnn_operator_t op,
   size_t step_height,
@@ -328,7 +324,7 @@ void xnn_indirection_init_maxpool2d(
   }
 }
 
-void xnn_indirection_init_resize_bilinear2d_f32(
+void xnn_indirection_init_resize_bilinear2d_hwc_f32(
   size_t input_pixel_stride,
   size_t input_height,
   size_t input_width,
@@ -417,6 +413,106 @@ void xnn_indirection_init_resize_bilinear2d_f32(
         packed_weights[0] = alpha_x;
         packed_weights[1] = alpha_y;
         indirection_buffer += 4;
+        packed_weights += 2;
+      }
+    }
+  }
+}
+
+void xnn_indirection_init_resize_bilinear2d_chw_f32(
+  size_t input_pixel_stride,
+  size_t input_height,
+  size_t input_width,
+  size_t output_height,
+  size_t output_width,
+  const void* input,
+  const void** indirection_buffer,
+  float* packed_weights,
+  bool align_corners,
+  bool tensorflow_legacy)
+{
+  assert(input_height > 1);
+  assert(input_height < 16777216 /* 2**24 */);
+  assert(input_width > 1);
+  assert(input_width < 16777216 /* 2**24 */);
+  assert(output_height != 0);
+  assert(output_height < 16777216 /* 2**24 */);
+  assert(output_width != 0);
+  assert(output_width < 16777216 /* 2**24 */);
+
+  const int32_t width_adjustment = (int32_t) (align_corners && output_width != 1);
+  const int32_t height_adjustment = (int32_t) (align_corners && output_height != 1);
+  const float width_scale =
+    (float) ((int32_t) input_width - width_adjustment) / (float) ((int32_t) output_width - width_adjustment);
+  const float height_scale =
+    (float) ((int32_t) input_height - height_adjustment) / (float) ((int32_t) output_height - height_adjustment);
+
+  const uint32_t input_y_max = (uint32_t) input_height - 1;
+  const uint32_t input_x_max = (uint32_t) input_width - 1;
+  if (tensorflow_legacy || align_corners) {
+    for (size_t output_y = 0; output_y < output_height; output_y++) {
+      const float input_y = (float) (int32_t) output_y * height_scale;
+      assert(input_y >= 0.0f);
+      assert(input_y < (float) input_height);
+
+      const uint32_t input_y_top = (uint32_t) (int32_t) input_y;
+      const uint32_t input_y_bottom = math_min_u32(input_y_top + 1, input_y_max);
+      const float alpha_y = input_y - (float) input_y_top;
+      for (size_t output_x = 0; output_x < output_width; output_x++) {
+        const float input_x = (float) (int32_t) output_x * width_scale;
+        assert(input_x >= 0.0f);
+        assert(input_x < (float) input_width);
+
+        uint32_t input_x_left = (uint32_t) (int32_t) input_x;
+
+        float alpha_x = input_x - (float) input_x_left;
+        if (input_x_left == input_x_max) {
+          // Ensure that there is a pixel to the right of the one pointed at,
+          // as required by some CHW kernels.
+          --input_x_left;
+          alpha_x = 1.0f;
+        }
+       indirection_buffer[0] =
+          (void*) ((uintptr_t) input + (input_y_top * input_width + input_x_left) * input_pixel_stride);
+       indirection_buffer[1] =
+          (void*) ((uintptr_t) input + (input_y_bottom * input_width + input_x_left) * input_pixel_stride);
+        packed_weights[0] = alpha_x;
+        packed_weights[1] = alpha_y;
+        indirection_buffer += 2;
+        packed_weights += 2;
+      }
+    }
+  } else {
+    const float height_offset = 0.5f * height_scale - 0.5f;
+    const float width_offset = 0.5f * width_scale - 0.5f;
+    for (size_t output_y = 0; output_y < output_height; output_y++) {
+      float input_y = (float) (int32_t) output_y * height_scale + height_offset;
+      input_y = math_min_f32(math_max_f32(input_y, 0.0f), (float) input_y_max);
+      const uint32_t input_y_top = (uint32_t) (int32_t) input_y;
+      assert((int32_t) input_y_top >= 0);
+      const uint32_t input_y_bottom = math_min_u32(input_y_top + 1, input_y_max);
+      const float alpha_y = input_y - (float) input_y_top;
+      for (size_t output_x = 0; output_x < output_width; output_x++) {
+        float input_x = (float) (int32_t) output_x * width_scale + width_offset;
+        input_x = math_min_f32(math_max_f32(input_x, 0.0f), (float) input_x_max);
+        uint32_t input_x_left = (uint32_t) (int32_t) input_x;
+        assert((int32_t) input_x_left >= 0);
+
+        float alpha_x = input_x - (float) input_x_left;
+        if (input_x_left == input_x_max) {
+          // Ensure that there is a pixel to the right of the one pointed at,
+          // as required by some CHW kernels.
+          --input_x_left;
+          alpha_x = 1.0f;
+        }
+
+        indirection_buffer[0] =
+          (void*) ((uintptr_t) input + (input_y_top * input_width + input_x_left) * input_pixel_stride);
+        indirection_buffer[1] =
+          (void*) ((uintptr_t) input + (input_y_bottom * input_width + input_x_left) * input_pixel_stride);
+        packed_weights[0] = alpha_x;
+        packed_weights[1] = alpha_y;
+        indirection_buffer += 2;
         packed_weights += 2;
       }
     }

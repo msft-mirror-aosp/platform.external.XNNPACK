@@ -25,7 +25,7 @@ static void f32_relu(
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), rng);
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), std::ref(rng));
 
   std::vector<float, AlignedAllocator<float, 64>> x(n);
   std::generate(x.begin(), x.end(), std::ref(f32rng));
@@ -104,6 +104,26 @@ static void f32_relu(
     ->RangeMultiplier(10)
     ->Range(1000, 100000000)
     ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_relu, wasm_x8, xnn_f32_relu_ukernel__wasm_x8)
+    ->RangeMultiplier(10)
+    ->Range(1000, 100000000)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_relu, wasm32_shr_x1, xnn_f32_relu_ukernel__wasm32_shr_x1)
+    ->RangeMultiplier(10)
+    ->Range(1000, 100000000)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_relu, wasm32_shr_x2, xnn_f32_relu_ukernel__wasm32_shr_x2)
+    ->RangeMultiplier(10)
+    ->Range(1000, 100000000)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_relu, wasm32_shr_x4, xnn_f32_relu_ukernel__wasm32_shr_x4)
+    ->RangeMultiplier(10)
+    ->Range(1000, 100000000)
+    ->UseRealTime();
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 #if XNN_ARCH_WASMSIMD
@@ -113,6 +133,11 @@ static void f32_relu(
     ->UseRealTime();
 
   BENCHMARK_CAPTURE(f32_relu, wasmsimd_x8, xnn_f32_relu_ukernel__wasmsimd_x8)
+    ->RangeMultiplier(10)
+    ->Range(1000, 100000000)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_relu, wasmsimd_x16, xnn_f32_relu_ukernel__wasmsimd_x16)
     ->RangeMultiplier(10)
     ->Range(1000, 100000000)
     ->UseRealTime();
@@ -129,6 +154,11 @@ BENCHMARK_CAPTURE(f32_relu, scalar_x2, xnn_f32_relu_ukernel__scalar_x2)
   ->UseRealTime();
 
 BENCHMARK_CAPTURE(f32_relu, scalar_x4, xnn_f32_relu_ukernel__scalar_x4)
+  ->RangeMultiplier(10)
+  ->Range(1000, 100000000)
+  ->UseRealTime();
+
+BENCHMARK_CAPTURE(f32_relu, scalar_x8, xnn_f32_relu_ukernel__scalar_x8)
   ->RangeMultiplier(10)
   ->Range(1000, 100000000)
   ->UseRealTime();

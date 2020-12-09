@@ -389,6 +389,39 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->opdata[i].inputs[0] = node->inputs[0];
         runtime->opdata[i].outputs[0] = node->outputs[0];
         break;
+      case xnn_node_type_depth_to_space:
+        status = xnn_status_unsupported_parameter;
+        if (values[node->inputs[0]].layout == xnn_layout_type_nchw) {
+          assert(values[node->outputs[0]].layout == xnn_layout_type_nhwc);
+          status = xnn_create_depth_to_space_nchw2nhwc_x32(
+              values[node->outputs[0]].shape.dim[values[node->outputs[0]].shape.num_dims - 1] /* output channels */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+              values[node->outputs[0]].shape.dim[values[node->outputs[0]].shape.num_dims - 1] /* output stride */,
+              node->params.depth_to_space.block_size,
+              node->flags,
+              &runtime->opdata[i].operator_object);
+        } else {
+          assert(values[node->inputs[0]].layout == xnn_layout_type_nhwc);
+          assert(values[node->outputs[0]].layout == xnn_layout_type_nhwc);
+          status = xnn_create_depth_to_space_nhwc_x32(
+              values[node->outputs[0]].shape.dim[values[node->outputs[0]].shape.num_dims - 1] /* output channels */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+              values[node->outputs[0]].shape.dim[values[node->outputs[0]].shape.num_dims - 1] /* output stride */,
+              node->params.depth_to_space.block_size,
+              node->flags,
+              &runtime->opdata[i].operator_object);
+        }
+        if (status != xnn_status_success) {
+          goto error;
+        }
+        runtime->opdata[i].batch_size = values[node->inputs[0]].shape.dim[0];
+        runtime->opdata[i].input_height = values[node->inputs[0]].shape.dim[1];
+        runtime->opdata[i].input_width = values[node->inputs[0]].shape.dim[2];
+        runtime->opdata[i].output_height = values[node->outputs[0]].shape.dim[1];
+        runtime->opdata[i].output_width = values[node->outputs[0]].shape.dim[2];
+        runtime->opdata[i].inputs[0] = node->inputs[0];
+        runtime->opdata[i].outputs[0] = node->outputs[0];
+        break;
       case xnn_node_type_divide:
         status = xnn_create_divide_nd_f32(
           node->activation.output_min,
@@ -680,12 +713,23 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->opdata[i].outputs[0] = node->outputs[0];
         break;
       case xnn_node_type_static_resize_bilinear_2d:
-        status = xnn_create_resize_bilinear2d_nhwc_f32(
-          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
-          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
-          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
-          node->flags,
-          &runtime->opdata[i].operator_object);
+        if (values[node->inputs[0]].layout == xnn_layout_type_nchw) {
+          status = xnn_create_resize_bilinear2d_nchw_f32(
+            values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+            values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+            values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
+            node->flags,
+            &runtime->opdata[i].operator_object);
+        } else {
+          assert(values[node->inputs[0]].layout == xnn_layout_type_nhwc);
+          assert(values[node->outputs[0]].layout == xnn_layout_type_nhwc);
+          status = xnn_create_resize_bilinear2d_nhwc_f32(
+            values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+            values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+            values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
+            node->flags,
+            &runtime->opdata[i].operator_object);
+        }
         if (status != xnn_status_success) {
           goto error;
         }
@@ -813,19 +857,23 @@ enum xnn_status xnn_create_runtime_v2(
   }
   xnn_plan_value_allocation_tracker(&mem_alloc_tracker);
 
-  runtime->workspace = xnn_allocate_simd_memory(mem_alloc_tracker.mem_arena_size);
-  if (runtime->workspace == NULL) {
-    xnn_log_error("failed to allocate %zu bytes to runtime workspace", mem_alloc_tracker.mem_arena_size);
-    xnn_release_value_allocation_tracker(&mem_alloc_tracker);
-    goto error;
-  }
-  for (size_t i = 0; i < subgraph->num_values; i++) {
-    const struct xnn_value* value = &subgraph->values[i];
-    struct xnn_blob* blob = &runtime->blobs[i];
-    if (value->datatype != xnn_datatype_invalid && value->type == xnn_value_type_dense_tensor) {
-      if (value->data == NULL && !blob->external) {
-        // Value is purely internal to the runtime, allocate it in the workspace.
-        blob->data = (void*) ((uintptr_t) runtime->workspace + mem_alloc_tracker.usage[i].alloc_offset);
+  if (mem_alloc_tracker.mem_arena_size != 0) {
+    // XNN_EXTRA_BYTES ensures that out-of-bound reads of intermediate values don't segfault.
+    const size_t mem_arena_size = mem_alloc_tracker.mem_arena_size + XNN_EXTRA_BYTES;
+    runtime->workspace = xnn_allocate_simd_memory(mem_arena_size);
+    if (runtime->workspace == NULL) {
+      xnn_log_error("failed to allocate %zu bytes for runtime workspace", mem_arena_size);
+      xnn_release_value_allocation_tracker(&mem_alloc_tracker);
+      goto error;
+    }
+    for (size_t i = 0; i < subgraph->num_values; i++) {
+      const struct xnn_value* value = &subgraph->values[i];
+      struct xnn_blob* blob = &runtime->blobs[i];
+      if (value->datatype != xnn_datatype_invalid && value->type == xnn_value_type_dense_tensor) {
+        if (value->data == NULL && !blob->external) {
+          // Value is purely internal to the runtime, allocate it in the workspace.
+          blob->data = (void*) ((uintptr_t) runtime->workspace + mem_alloc_tracker.usage[i].alloc_offset);
+        }
       }
     }
   }
@@ -1023,6 +1071,30 @@ enum xnn_status xnn_setup_runtime(
           runtime->blobs[opdata->outputs[0]].data,
           runtime->threadpool);
         break;
+      case xnn_operator_type_depth_to_space_nchw2nhwc_x32:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_depth_to_space_nchw2nhwc_x32(
+            opdata->operator_object,
+            opdata->batch_size,
+            opdata->input_height,
+            opdata->input_width,
+            runtime->blobs[opdata->inputs[0]].data,
+            runtime->blobs[opdata->outputs[0]].data,
+            runtime->threadpool);
+        break;
+      case xnn_operator_type_depth_to_space_nhwc_x32:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_depth_to_space_nhwc_x32(
+            opdata->operator_object,
+            opdata->batch_size,
+            opdata->input_height,
+            opdata->input_width,
+            runtime->blobs[opdata->inputs[0]].data,
+            runtime->blobs[opdata->outputs[0]].data,
+            runtime->threadpool);
+        break;
       case xnn_operator_type_divide_nd_f32:
         assert(runtime->blobs[opdata->inputs[0]].data != NULL);
         assert(runtime->blobs[opdata->inputs[1]].data != NULL);
@@ -1173,6 +1245,20 @@ enum xnn_status xnn_setup_runtime(
         status = xnn_setup_prelu_nc_f32(
           opdata->operator_object,
           opdata->batch_size,
+          runtime->blobs[opdata->inputs[0]].data,
+          runtime->blobs[opdata->outputs[0]].data,
+          runtime->threadpool);
+        break;
+      case xnn_operator_type_resize_bilinear_nchw_f32:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_resize_bilinear2d_nchw_f32(
+          opdata->operator_object,
+          opdata->batch_size,
+          opdata->input_height,
+          opdata->input_width,
+          opdata->output_height,
+          opdata->output_width,
           runtime->blobs[opdata->inputs[0]].data,
           runtime->blobs[opdata->outputs[0]].data,
           runtime->threadpool);
