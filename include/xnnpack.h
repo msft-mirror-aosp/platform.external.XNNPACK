@@ -19,7 +19,7 @@ extern "C" {
 #endif
 
 /// The number of bytes XNNPACK may read beyond array bounds.
-/// The caller must allocate at this this many extra bytes after the tensor data passed to XNNPACK.
+/// The caller must allocate at least this many extra bytes after the tensor data passed to XNNPACK.
 ///
 /// Note: XNNPACK reads, but never writes beyond array bounds.
 #define XNN_EXTRA_BYTES 16
@@ -358,6 +358,24 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
   uint32_t filter_id,
   uint32_t bias_id,
   uint32_t output_id,
+  uint32_t flags);
+
+/// Define a DepthToSpace Node and add it to a Subgraph.
+///
+/// The DepthToSpace Node rearranges data from depth into blocks of spatial data (a reverse transform for SpaceToDepth).
+/// For a given input pixel, an output square of pixels with side @a block_size is formed from values in the corresponding
+/// number of its channels. The output depth is therefore @a block_size x @a block_size times smaller than that of the input.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input_id - Value ID for the input tensor. The input tensor must be divisible by @a block_size in the channel dimension.
+/// @param output_id - Value ID for the output tensor.
+/// @param block_size - the size of the spatial block.
+/// @param flags - binary features of the DepthToSpace Node. No supported flags are currently defined.
+enum xnn_status xnn_define_depth_to_space(
+  xnn_subgraph_t subgraph,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t block_size,
   uint32_t flags);
 
 /// Define a 2D Global Average Pooling Node and add it to a Subgraph.
@@ -1451,6 +1469,24 @@ enum xnn_status xnn_setup_prelu_nc_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_resize_bilinear2d_nchw_f32(
+  size_t channels,
+  size_t input_pixel_stride,
+  size_t output_pixel_stride,
+  uint32_t flags,
+  xnn_operator_t* resize_op_out);
+
+enum xnn_status xnn_setup_resize_bilinear2d_nchw_f32(
+  xnn_operator_t resize_op,
+  size_t batch_size,
+  size_t input_height,
+  size_t input_width,
+  size_t output_height,
+  size_t output_width,
+  const float* input,
+  float* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_resize_bilinear2d_nhwc_f32(
   size_t channels,
   size_t input_pixel_stride,
@@ -1670,6 +1706,40 @@ enum xnn_status xnn_setup_copy_nc_x32(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_depth_to_space_nhwc_x32(
+  size_t output_channels,
+  size_t input_channel_stride,
+  size_t output_channel_stride,
+  uint32_t block_size,
+  uint32_t flags,
+  xnn_operator_t* depth_to_space_op_out);
+
+enum xnn_status xnn_setup_depth_to_space_nhwc_x32(
+  xnn_operator_t depth_to_space_op,
+  size_t batch_size,
+  size_t input_height,
+  size_t input_width,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_depth_to_space_nchw2nhwc_x32(
+  size_t output_channels,
+  size_t input_channel_stride,
+  size_t output_channel_stride,
+  uint32_t block_size,
+  uint32_t flags,
+  xnn_operator_t* depth_to_space_op_out);
+
+enum xnn_status xnn_setup_depth_to_space_nchw2nhwc_x32(
+  xnn_operator_t depth_to_space_op,
+  size_t batch_size,
+  size_t input_height,
+  size_t input_width,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_unpooling2d_nhwc_x32(
   uint32_t input_padding_top,
   uint32_t input_padding_right,
@@ -1763,7 +1833,123 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_f16(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_hardswish_nc_f16(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  uint32_t flags,
+  xnn_operator_t* hardswish_op_out);
+
+enum xnn_status xnn_setup_hardswish_nc_f16(
+  xnn_operator_t hardswish_op,
+  size_t batch_size,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_multiply_nd_f16(
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_operator_t* multiply_op_out);
+
+enum xnn_status xnn_setup_multiply_nd_f16(
+  xnn_operator_t multiply_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const void* input1,
+  const void* input2,
+  void* output,
+  pthreadpool_t threadpool);
+
 #endif  // XNN_NO_F16_OPERATORS
+
+#ifndef XNN_NO_QS8_OPERATORS
+
+enum xnn_status xnn_create_add_nd_qs8(
+  int8_t input1_zero_point,
+  float input1_scale,
+  int8_t input2_zero_point,
+  float input2_scale,
+  int8_t output_zero_point,
+  float output_scale,
+  int8_t output_min,
+  int8_t output_max,
+  uint32_t flags,
+  xnn_operator_t* add_op_out);
+
+enum xnn_status xnn_setup_add_nd_qs8(
+  xnn_operator_t add_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const int8_t* input1,
+  const int8_t* input2,
+  int8_t* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_convolution2d_nhwc_qs8(
+  uint32_t input_padding_top,
+  uint32_t input_padding_right,
+  uint32_t input_padding_bottom,
+  uint32_t input_padding_left,
+  uint32_t kernel_height,
+  uint32_t kernel_width,
+  uint32_t subsampling_height,
+  uint32_t subsampling_width,
+  uint32_t dilation_height,
+  uint32_t dilation_width,
+  uint32_t groups,
+  size_t group_input_channels,
+  size_t group_output_channels,
+  size_t input_channel_stride,
+  size_t output_channel_stride,
+  int8_t input_zero_point,
+  float input_scale,
+  float kernel_scale,
+  const int8_t* kernel,
+  const int32_t* bias,
+  int8_t output_zero_point,
+  float output_scale,
+  int8_t output_min,
+  int8_t output_max,
+  uint32_t flags,
+  xnn_operator_t* convolution_op_out);
+
+enum xnn_status xnn_setup_convolution2d_nhwc_qs8(
+  xnn_operator_t convolution_op,
+  size_t batch_size,
+  size_t input_height,
+  size_t input_width,
+  const int8_t* input,
+  int8_t* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_global_average_pooling_nwc_qs8(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  int8_t input_zero_point,
+  float input_scale,
+  int8_t output_zero_point,
+  float output_scale,
+  int8_t output_min,
+  int8_t output_max,
+  uint32_t flags,
+  xnn_operator_t* global_average_pooling_op_out);
+
+enum xnn_status xnn_setup_global_average_pooling_nwc_qs8(
+  xnn_operator_t global_average_pooling_op,
+  size_t batch_size,
+  size_t width,
+  const int8_t* input,
+  int8_t* output,
+  pthreadpool_t threadpool);
+
+#endif  // XNN_NO_QS8_OPERATORS
 
 #ifndef XNN_NO_QU8_OPERATORS
 

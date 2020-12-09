@@ -47,6 +47,14 @@ bool CheckNEON(benchmark::State& state);
 // If NEON-FMA is unsupported, report error in benchmark state, and return false.
 bool CheckNEONFMA(benchmark::State& state);
 
+// Check if ARM DOT extension is supported.
+// If DOT is unsupported, report error in benchmark state, and return false.
+bool CheckNEONDOT(benchmark::State& state);
+
+// Check if x86 SSSE3 extension is supported.
+// If SSSE3 is unsupported, report error in benchmark state, and return false.
+bool CheckSSSE3(benchmark::State& state);
+
 // Check if x86 SSE4.1 extension is supported.
 // If SSE4.1 is unsupported, report error in benchmark state, and return false.
 bool CheckSSE41(benchmark::State& state);
@@ -54,6 +62,10 @@ bool CheckSSE41(benchmark::State& state);
 // Check if x86 AVX extension is supported.
 // If AVX is unsupported, report error in benchmark state, and return false.
 bool CheckAVX(benchmark::State& state);
+
+// Check if x86 XOP extension is supported.
+// If XOP is unsupported, report error in benchmark state, and return false.
+bool CheckXOP(benchmark::State& state);
 
 // Check if x86 FMA3 extension is supported.
 // If FMA3 is unsupported, report error in benchmark state, and return false.
@@ -66,6 +78,10 @@ bool CheckAVX2(benchmark::State& state);
 // Check if x86 AVX512F extension is supported.
 // If AVX512F is unsupported, report error in benchmark state, and return false.
 bool CheckAVX512F(benchmark::State& state);
+
+// Check if x86 SKX-level AVX512 extensions (AVX512F, AVX512CD, AVX512BW, AVX512DQ, and AVX512VL) are supported.
+// If SKX-level AVX512 extensions are unsupported, report error in benchmark state, and return false.
+bool CheckAVX512SKX(benchmark::State& state);
 
 template <class T>
 inline T DivideRoundUp(T x, T q) {
