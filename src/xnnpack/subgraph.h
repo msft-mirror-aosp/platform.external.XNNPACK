@@ -91,6 +91,7 @@ enum xnn_node_type {
   xnn_node_type_depthwise_convolution_2d,
   xnn_node_type_depth_to_space,
   xnn_node_type_divide,
+  xnn_node_type_elu,
   xnn_node_type_fully_connected,
   xnn_node_type_floor,
   xnn_node_type_global_average_pooling_2d,
@@ -181,6 +182,9 @@ struct xnn_node {
       uint32_t dilation_width;
     } pooling_2d;
     struct {
+      float alpha;
+    } elu;
+    struct {
       float negative_slope;
     } leaky_relu;
     struct {
@@ -209,6 +213,12 @@ struct xnn_node {
   uint32_t flags;
   uint32_t layout_flags;
   uint32_t cluster_leader;
+  // Number of filter parameters in all 1x1 Convolutions of the sparse cluster.
+  // This value is properly initialized only in sparse inference analysis of 1x1 Convolutions.
+  size_t num_params;
+  // Number of zero filter parameters in all 1x1 Convolutions of the sparse cluster.
+  // This value is properly initialized only in sparse inference analysis of 1x1 Convolutions.
+  size_t num_zeroes;
 };
 
 struct xnn_operator_data {
