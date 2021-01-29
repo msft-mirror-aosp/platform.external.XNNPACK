@@ -18,6 +18,10 @@
 
 #define XNN_INVALID_NODE_ID UINT32_MAX
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct xnn_shape {
   size_t num_dims;
   size_t dim[XNN_MAX_TENSOR_DIMS];
@@ -85,6 +89,7 @@ enum xnn_node_type {
   xnn_node_type_convolution_2d,
   xnn_node_type_deconvolution_2d,
   xnn_node_type_depthwise_convolution_2d,
+  xnn_node_type_depth_to_space,
   xnn_node_type_divide,
   xnn_node_type_fully_connected,
   xnn_node_type_floor,
@@ -160,6 +165,9 @@ struct xnn_node {
       uint32_t depth_multiplier;
       size_t input_channels;
     } depthwise_convolution_2d;
+    struct {
+      uint32_t block_size;
+    } depth_to_space;
     struct {
       uint32_t padding_top;
       uint32_t padding_right;
@@ -261,5 +269,12 @@ size_t xnn_tensor_get_size(
 
 enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph, uint32_t flags);
 
+void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph);
+
 void xnn_node_clear(struct xnn_node* node);
 void xnn_value_clear(struct xnn_value* value);
+
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
