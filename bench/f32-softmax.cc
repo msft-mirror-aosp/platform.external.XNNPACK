@@ -33,7 +33,7 @@ static void DNNLSoftArgMax(
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1000.0f, 1000.0f), rng);
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1000.0f, 1000.0f), std::ref(rng));
 
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), packed_n * sizeof(float));
@@ -187,7 +187,7 @@ static void ThreePassSoftMaxWithRecomputing(
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1000.0f, 1000.0f), rng);
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1000.0f, 1000.0f), std::ref(rng));
 
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), packed_n * sizeof(float));
@@ -242,7 +242,7 @@ static void ThreePassSoftMaxWithReloading(
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1000.0f, 1000.0f), rng);
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1000.0f, 1000.0f), std::ref(rng));
 
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), packed_n * sizeof(float));
@@ -296,7 +296,7 @@ static void TwoPassSoftMax(
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1000.0f, 1000.0f), rng);
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1000.0f, 1000.0f), std::ref(rng));
 
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), packed_n * sizeof(float));
@@ -356,7 +356,7 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
   BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, avx2_p5,
     xnn_f32_rmax_ukernel__avx,
     xnn_f32_raddstoreexpminusmax_ukernel__avx2_p5_x64_acc2,
-    xnn_f32_vscale_ukernel__avx_unroll32,
+    xnn_f32_vscale_ukernel__avx_x32,
     benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
 
   BENCHMARK_CAPTURE(TwoPassSoftMax, avx512f_p5_scalef,
@@ -371,7 +371,7 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
   BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, avx512f_p5_scalef,
     xnn_f32_rmax_ukernel__avx512f,
     xnn_f32_raddstoreexpminusmax_ukernel__avx512f_p5_scalef_x128_acc2,
-    xnn_f32_vscale_ukernel__avx512f_unroll64,
+    xnn_f32_vscale_ukernel__avx512f_x64,
     benchmark::utils::CheckAVX512F)->Apply(CharacteristicArguments)->UseManualTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
