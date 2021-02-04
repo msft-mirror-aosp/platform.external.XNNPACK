@@ -98,6 +98,21 @@ union xnn_f32_rnd_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
+union xnn_f32_elu_params {
+  struct {
+    float prescale;
+    float alpha;
+    float beta;
+  } scalar;
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) float prescale[4];
+    XNN_ALIGN(16) float alpha[4];
+    XNN_ALIGN(16) float beta[4];
+  } sse;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+};
+
 union xnn_f32_lrelu_params {
   struct {
     float slope;
@@ -1564,6 +1579,12 @@ typedef void (*xnn_qs8_vadd_minmax_ukernel_function)(
     int8_t* output,
     const union xnn_qs8_add_params* params);
 
+typedef void (*xnn_f32_velu_ukernel_function)(
+    size_t n,
+    const float* x,
+    float* y,
+    const union xnn_f32_elu_params* params);
+
 typedef void (*xnn_f32_vsqrt_ukernel_function)(
     size_t n,
     const float* x,
@@ -1827,8 +1848,6 @@ struct conv_hwc2chw_parameters {
 
 struct dwconv2d_chw_parameters {
   xnn_dwconv2d_chw_ukernel_function ukernel;
-  // Number of input width pixels in a tile.
-  uint8_t input_width_tile;
   // Number of output width pixels in a tile.
   uint8_t output_width_tile;
   // Number of output height pixels in a tile.
@@ -1981,6 +2000,8 @@ struct vmulcaddc_parameters {
 #define XNN_INIT_FLAG_X8      0x00000100
 // Indicates that XX XNNPACK microkernels are available for use.
 #define XNN_INIT_FLAG_XX      0x00000200
+// Indicates that CHW XNNPACK microkernels are optimized for the host platform.
+#define XNN_INIT_FLAG_CHW_OPT 0x00000400
 
 struct xnn_parameters {
   // Bitwise combination of XNN_INIT_FLAG_* flags
@@ -2035,6 +2056,7 @@ struct xnn_parameters {
     struct ibilinear_parameters ibilinear;
     xnn_univector_ukernel_function abs;
     xnn_univector_ukernel_function clamp;
+    xnn_univector_ukernel_function elu;
     xnn_univector_ukernel_function hswish;
     xnn_univector_ukernel_function lrelu;
     xnn_univector_ukernel_function neg;

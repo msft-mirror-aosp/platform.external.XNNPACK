@@ -45,9 +45,9 @@ http_archive(
 # pthreadpool library, used for parallelization
 http_archive(
     name = "pthreadpool",
-    strip_prefix = "pthreadpool-029c88620802e1361ccf41d1970bd5b07fd6b7bb",
-    sha256 = "03312bd7d8d9e379d685258963ee8820767158b5946cdd00336ff17dae851001",
-    urls = ["https://github.com/Maratyszcza/pthreadpool/archive/029c88620802e1361ccf41d1970bd5b07fd6b7bb.zip"],
+    strip_prefix = "pthreadpool-545ebe9f225aec6dca49109516fac02e973a3de2",
+    sha256 = "8461f6540ae9f777ce20d1c0d1d249e5e61c438744fb390c0c6f91940aa69ea3",
+    urls = ["https://github.com/Maratyszcza/pthreadpool/archive/545ebe9f225aec6dca49109516fac02e973a3de2.zip"],
 )
 
 # clog library, used for logging
@@ -65,22 +65,13 @@ http_archive(
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
     name = "cpuinfo",
-    strip_prefix = "cpuinfo-6cecd15784fcb6c5c0aa7311c6248879ce2cb8b2",
-    sha256 = "b1f2ee97e46d8917a66bcb47452fc510d511829556c93b83e06841b9b35261a5",
+    strip_prefix = "cpuinfo-ed8b86a253800bafdb7b25c5c399f91bff9cb1f3",
+    sha256 = "a7f9a188148a1660149878f737f42783e72f33a4f842f3e362fee2c981613e53",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/6cecd15784fcb6c5c0aa7311c6248879ce2cb8b2.zip",
+        "https://github.com/pytorch/cpuinfo/archive/ed8b86a253800bafdb7b25c5c399f91bff9cb1f3.zip",
     ],
     build_file = "@//third_party:cpuinfo.BUILD",
     patches = ["@//third_party:cpuinfo.patch"],
-)
-
-# psimd library, used for fallback 128-bit SIMD micro-kernels
-http_archive(
-    name = "psimd",
-    strip_prefix = "psimd-072586a71b55b7f8c584153d223e95687148a900",
-    sha256 = "dc615342bcbe51ca885323e51b68b90ed9bb9fa7df0f4419dbfa0297d5e837b7",
-    urls = ["https://github.com/Maratyszcza/psimd/archive/072586a71b55b7f8c584153d223e95687148a900.zip"],
-    build_file = "@//third_party:psimd.BUILD",
 )
 
 # Ruy library, used to benchmark against

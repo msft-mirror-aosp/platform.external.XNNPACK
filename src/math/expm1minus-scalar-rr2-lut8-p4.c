@@ -60,26 +60,27 @@ void xnn_math_f32_expm1minus__scalar_rr2_lut8_p4(
     //    lower than -25.
     //
     // Shift bits 3:11 into 23:31 (position of floating-point exponent).
-    const uint32_t ve = fp32_to_bits(vn) << 20;
+    const uint32_t ven = fp32_to_bits(vn) << 20;
 
     // Use bits 0:3 bits of n, as integer, as an index for table lookup of l := 2**frac(n).
     const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
     // Adjust exponent of the value l fetched from the table to get the final s value.
-    float vs = fp32_from_bits(xnn_table_exp2minus_k_over_8[vidx] + ve);
+    float vs = fp32_from_bits(xnn_table_exp2minus_k_over_8[vidx] + ven);
 
     // Subtract the large number back to get final n := round(x / log(2), 3).
     vn -= vmagic_bias;
-
-    // The function saturates at -1 for large negative inputs: expm1f(x) == -1.0f for x <= sat_cutoff ~= -17.328680.
-    // To guarantee this behaviour, we zero out s (scale) for x <= sat_cutoff.
-    if XNN_UNPREDICTABLE(vx <= vsat_cutoff) {
-      vs = 0.0f;
-    }
 
     // Compute reduced argument t := x - n * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     float vt = vn * vminus_ln2_hi + vx;
     vt = vn * vminus_ln2_lo + vt;
+
+    // The function saturates at -1 for large negative inputs: expm1f(x) == -1.0f for x <= sat_cutoff ~= -17.328680.
+    // To guarantee this behaviour, we zero out s (scale) and t (reduced argument) for x <= sat_cutoff.
+    if XNN_UNPREDICTABLE(vx <= vsat_cutoff) {
+      vs = 0.0f;
+      vt = 0.0f;
+    }
 
     // Compute degree-4 polynomial approximation for exp(t) - 1 on [-log(2)/16, log(2)/16].
     //   P(t) = t * (1 + t * (c2 + t * (c3 + t * c4))) = t + t * (t * (c2 + t * (c3 + t * c4))) = t + t * p
