@@ -57,6 +57,7 @@ enum xnn_operator_type {
   xnn_operator_type_depth_to_space_nchw2nhwc_x32,
   xnn_operator_type_depth_to_space_nhwc_x32,
   xnn_operator_type_divide_nd_f32,
+  xnn_operator_type_elu_nc_f32,
   xnn_operator_type_fully_connected_nc_f32,
   xnn_operator_type_fully_connected_nc_qu8,
   xnn_operator_type_floor_nc_f32,
@@ -114,7 +115,6 @@ struct xnn_ukernel_dwconv2d {
   union {
     xnn_dwconv2d_chw_ukernel_function chw_function;
   };
-  uint8_t input_width_tile;
   uint8_t output_width_tile;
 };
 
@@ -258,6 +258,7 @@ struct xnn_operator {
 
   union {
     union xnn_f32_abs_params f32_abs;
+    union xnn_f32_elu_params f32_elu;
     union xnn_f32_lrelu_params f32_lrelu;
     union xnn_f32_neg_params f32_neg;
     union xnn_f32_rnd_params f32_rnd;
