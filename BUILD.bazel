@@ -491,8 +491,6 @@ SCALAR_UKERNELS = [
     "src/math/sigmoid-scalar-rr2-lut64-p2-div.c",
     "src/math/sigmoid-scalar-rr2-lut2048-p1-div.c",
     "src/math/sigmoid-scalar-rr2-p5-div.c",
-    "src/qs8-gemm/gen/8x8c4-minmax-scalar.c",
-    "src/qs8-gemm/gen/12x4c4-minmax-scalar.c",
     "src/qs8-requantization/fp32-scalar-lrintf.c",
     "src/qs8-requantization/fp32-scalar-magic.c",
     "src/qs8-requantization/precise-scalar-signed64.c",
@@ -505,8 +503,6 @@ SCALAR_UKERNELS = [
     "src/qu8-gavgpool/7p7x-minmax-scalar-c1.c",
     "src/qu8-gavgpool/7x-minmax-scalar-c1.c",
     "src/qu8-gemm/2x2-minmax-scalar.c",
-    "src/qu8-gemm/gen/8x8c4-minmax-scalar.c",
-    "src/qu8-gemm/gen/12x4c4-minmax-scalar.c",
     "src/qu8-igemm/2x2-minmax-scalar.c",
     "src/qu8-requantization/fp32-scalar-lrintf.c",
     "src/qu8-requantization/fp32-scalar-magic.c",
@@ -818,14 +814,6 @@ WASMSIMD_UKERNELS = [
     "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-loadsplat-2x4.c",
     "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-loadsplat-3x4.c",
     "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-loadsplat-4x4.c",
-    "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-1x4-acc2.c",
-    "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-1x4-acc3.c",
-    "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-1x4-acc4.c",
-    "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-1x4.c",
-    "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-2x4-acc2.c",
-    "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-2x4.c",
-    "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-3x4.c",
-    "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-4x4.c",
     "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-splat-1x4-acc2.c",
     "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-splat-1x4-acc3.c",
     "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-splat-1x4-acc4.c",
@@ -834,6 +822,14 @@ WASMSIMD_UKERNELS = [
     "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-splat-2x4.c",
     "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-splat-3x4.c",
     "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-splat-4x4.c",
+    "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-1x4-acc2.c",
+    "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-1x4-acc3.c",
+    "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-1x4-acc4.c",
+    "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-1x4.c",
+    "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-2x4-acc2.c",
+    "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-2x4.c",
+    "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-3x4.c",
+    "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-4x4.c",
     "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-splat-1x4-acc2.c",
     "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-splat-1x4-acc3.c",
     "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-splat-1x4-acc4.c",
@@ -1523,6 +1519,8 @@ NEON_UKERNELS = [
     "src/f32-hswish/gen/hswish-neon-x4.c",
     "src/f32-hswish/gen/hswish-neon-x8.c",
     "src/f32-hswish/gen/hswish-neon-x16.c",
+    "src/f32-ibilinear-chw/gen/neon-p4.c",
+    "src/f32-ibilinear-chw/gen/neon-p8.c",
     "src/f32-ibilinear/gen/neon-c4.c",
     "src/f32-ibilinear/gen/neon-c8.c",
     "src/f32-igemm/gen/1x8-minmax-neon-dup-ld64.c",
@@ -1697,13 +1695,117 @@ NEON_UKERNELS = [
     "src/qs8-gavgpool/gen/7x-minmax-neon-c24-acc2.c",
     "src/qs8-gavgpool/gen/7x-minmax-neon-c32-acc2.c",
     "src/qs8-gemm/gen/1x8-minmax-neon-mlal-lane.c",
+    "src/qs8-gemm/gen/1x8-minmax-neon-mull-addw-dup.c",
+    "src/qs8-gemm/gen/1x8c2-minmax-neon-mlal-padal-dup.c",
+    "src/qs8-gemm/gen/1x8c2-minmax-neon-mull-padal-dup.c",
+    "src/qs8-gemm/gen/1x8c8-minmax-neon-mlal-padal.c",
+    "src/qs8-gemm/gen/1x8c8-minmax-neon-mull-padal.c",
+    "src/qs8-gemm/gen/1x8c16-minmax-neon-mlal-padal.c",
     "src/qs8-gemm/gen/1x16-minmax-neon-mlal-lane.c",
+    "src/qs8-gemm/gen/1x16-minmax-neon-mull-addw-dup.c",
+    "src/qs8-gemm/gen/1x16c2-minmax-neon-mlal-padal-dup.c",
+    "src/qs8-gemm/gen/1x16c2-minmax-neon-mull-padal-dup.c",
+    "src/qs8-gemm/gen/1x16c8-minmax-neon-mlal-padal.c",
+    "src/qs8-gemm/gen/1x16c8-minmax-neon-mull-padal.c",
+    "src/qs8-gemm/gen/1x16c16-minmax-neon-mlal-padal.c",
     "src/qs8-gemm/gen/2x8-minmax-neon-mlal-lane.c",
+    "src/qs8-gemm/gen/2x8-minmax-neon-mull-addw-dup.c",
+    "src/qs8-gemm/gen/2x8c2-minmax-neon-mlal-padal-dup.c",
+    "src/qs8-gemm/gen/2x8c2-minmax-neon-mull-padal-dup.c",
+    "src/qs8-gemm/gen/2x8c8-minmax-neon-mlal-padal.c",
+    "src/qs8-gemm/gen/2x8c8-minmax-neon-mull-padal.c",
+    "src/qs8-gemm/gen/2x8c16-minmax-neon-mlal-padal.c",
     "src/qs8-gemm/gen/2x16-minmax-neon-mlal-lane.c",
+    "src/qs8-gemm/gen/2x16-minmax-neon-mull-addw-dup.c",
+    "src/qs8-gemm/gen/2x16c2-minmax-neon-mlal-padal-dup.c",
+    "src/qs8-gemm/gen/2x16c2-minmax-neon-mull-padal-dup.c",
+    "src/qs8-gemm/gen/2x16c8-minmax-neon-mlal-padal.c",
+    "src/qs8-gemm/gen/2x16c8-minmax-neon-mull-padal.c",
+    "src/qs8-gemm/gen/2x16c16-minmax-neon-mlal-padal.c",
+    "src/qs8-gemm/gen/3x8-minmax-neon-mlal-lane.c",
+    "src/qs8-gemm/gen/3x8-minmax-neon-mull-addw-dup.c",
+    "src/qs8-gemm/gen/3x8c2-minmax-neon-mlal-padal-dup.c",
+    "src/qs8-gemm/gen/3x8c2-minmax-neon-mull-padal-dup.c",
+    "src/qs8-gemm/gen/3x8c8-minmax-neon-mlal-padal.c",
+    "src/qs8-gemm/gen/3x8c8-minmax-neon-mull-padal.c",
+    "src/qs8-gemm/gen/3x8c16-minmax-neon-mlal-padal.c",
+    "src/qs8-gemm/gen/3x16-minmax-neon-mlal-lane.c",
+    "src/qs8-gemm/gen/3x16-minmax-neon-mull-addw-dup.c",
+    "src/qs8-gemm/gen/3x16c2-minmax-neon-mlal-padal-dup.c",
+    "src/qs8-gemm/gen/3x16c2-minmax-neon-mull-padal-dup.c",
+    "src/qs8-gemm/gen/3x16c8-minmax-neon-mlal-padal.c",
+    "src/qs8-gemm/gen/3x16c8-minmax-neon-mull-padal.c",
+    "src/qs8-gemm/gen/3x16c16-minmax-neon-mlal-padal.c",
+    "src/qs8-gemm/gen/4x8-minmax-neon-mlal-lane.c",
+    "src/qs8-gemm/gen/4x8-minmax-neon-mull-addw-dup.c",
+    "src/qs8-gemm/gen/4x8c2-minmax-neon-mlal-padal-dup.c",
+    "src/qs8-gemm/gen/4x8c2-minmax-neon-mull-padal-dup.c",
+    "src/qs8-gemm/gen/4x8c8-minmax-neon-mlal-padal.c",
+    "src/qs8-gemm/gen/4x8c8-minmax-neon-mull-padal.c",
+    "src/qs8-gemm/gen/4x8c16-minmax-neon-mlal-padal.c",
+    "src/qs8-gemm/gen/4x16-minmax-neon-mlal-lane.c",
+    "src/qs8-gemm/gen/4x16-minmax-neon-mull-addw-dup.c",
+    "src/qs8-gemm/gen/4x16c2-minmax-neon-mlal-padal-dup.c",
+    "src/qs8-gemm/gen/4x16c2-minmax-neon-mull-padal-dup.c",
+    "src/qs8-gemm/gen/4x16c8-minmax-neon-mlal-padal.c",
+    "src/qs8-gemm/gen/4x16c8-minmax-neon-mull-padal.c",
+    "src/qs8-gemm/gen/4x16c16-minmax-neon-mlal-padal.c",
     "src/qs8-igemm/gen/1x8-minmax-neon-mlal-lane.c",
+    "src/qs8-igemm/gen/1x8-minmax-neon-mull-addw-dup.c",
+    "src/qs8-igemm/gen/1x8c2-minmax-neon-mlal-padal-dup.c",
+    "src/qs8-igemm/gen/1x8c2-minmax-neon-mull-padal-dup.c",
+    "src/qs8-igemm/gen/1x8c8-minmax-neon-mlal-padal.c",
+    "src/qs8-igemm/gen/1x8c8-minmax-neon-mull-padal.c",
+    "src/qs8-igemm/gen/1x8c16-minmax-neon-mlal-padal.c",
     "src/qs8-igemm/gen/1x16-minmax-neon-mlal-lane.c",
+    "src/qs8-igemm/gen/1x16-minmax-neon-mull-addw-dup.c",
+    "src/qs8-igemm/gen/1x16c2-minmax-neon-mlal-padal-dup.c",
+    "src/qs8-igemm/gen/1x16c2-minmax-neon-mull-padal-dup.c",
+    "src/qs8-igemm/gen/1x16c8-minmax-neon-mlal-padal.c",
+    "src/qs8-igemm/gen/1x16c8-minmax-neon-mull-padal.c",
+    "src/qs8-igemm/gen/1x16c16-minmax-neon-mlal-padal.c",
     "src/qs8-igemm/gen/2x8-minmax-neon-mlal-lane.c",
+    "src/qs8-igemm/gen/2x8-minmax-neon-mull-addw-dup.c",
+    "src/qs8-igemm/gen/2x8c2-minmax-neon-mlal-padal-dup.c",
+    "src/qs8-igemm/gen/2x8c2-minmax-neon-mull-padal-dup.c",
+    "src/qs8-igemm/gen/2x8c8-minmax-neon-mlal-padal.c",
+    "src/qs8-igemm/gen/2x8c8-minmax-neon-mull-padal.c",
+    "src/qs8-igemm/gen/2x8c16-minmax-neon-mlal-padal.c",
     "src/qs8-igemm/gen/2x16-minmax-neon-mlal-lane.c",
+    "src/qs8-igemm/gen/2x16-minmax-neon-mull-addw-dup.c",
+    "src/qs8-igemm/gen/2x16c2-minmax-neon-mlal-padal-dup.c",
+    "src/qs8-igemm/gen/2x16c2-minmax-neon-mull-padal-dup.c",
+    "src/qs8-igemm/gen/2x16c8-minmax-neon-mlal-padal.c",
+    "src/qs8-igemm/gen/2x16c8-minmax-neon-mull-padal.c",
+    "src/qs8-igemm/gen/2x16c16-minmax-neon-mlal-padal.c",
+    "src/qs8-igemm/gen/3x8-minmax-neon-mlal-lane.c",
+    "src/qs8-igemm/gen/3x8-minmax-neon-mull-addw-dup.c",
+    "src/qs8-igemm/gen/3x8c2-minmax-neon-mlal-padal-dup.c",
+    "src/qs8-igemm/gen/3x8c2-minmax-neon-mull-padal-dup.c",
+    "src/qs8-igemm/gen/3x8c8-minmax-neon-mlal-padal.c",
+    "src/qs8-igemm/gen/3x8c8-minmax-neon-mull-padal.c",
+    "src/qs8-igemm/gen/3x8c16-minmax-neon-mlal-padal.c",
+    "src/qs8-igemm/gen/3x16-minmax-neon-mlal-lane.c",
+    "src/qs8-igemm/gen/3x16-minmax-neon-mull-addw-dup.c",
+    "src/qs8-igemm/gen/3x16c2-minmax-neon-mlal-padal-dup.c",
+    "src/qs8-igemm/gen/3x16c2-minmax-neon-mull-padal-dup.c",
+    "src/qs8-igemm/gen/3x16c8-minmax-neon-mlal-padal.c",
+    "src/qs8-igemm/gen/3x16c8-minmax-neon-mull-padal.c",
+    "src/qs8-igemm/gen/3x16c16-minmax-neon-mlal-padal.c",
+    "src/qs8-igemm/gen/4x8-minmax-neon-mlal-lane.c",
+    "src/qs8-igemm/gen/4x8-minmax-neon-mull-addw-dup.c",
+    "src/qs8-igemm/gen/4x8c2-minmax-neon-mlal-padal-dup.c",
+    "src/qs8-igemm/gen/4x8c2-minmax-neon-mull-padal-dup.c",
+    "src/qs8-igemm/gen/4x8c8-minmax-neon-mlal-padal.c",
+    "src/qs8-igemm/gen/4x8c8-minmax-neon-mull-padal.c",
+    "src/qs8-igemm/gen/4x8c16-minmax-neon-mlal-padal.c",
+    "src/qs8-igemm/gen/4x16-minmax-neon-mlal-lane.c",
+    "src/qs8-igemm/gen/4x16-minmax-neon-mull-addw-dup.c",
+    "src/qs8-igemm/gen/4x16c2-minmax-neon-mlal-padal-dup.c",
+    "src/qs8-igemm/gen/4x16c2-minmax-neon-mull-padal-dup.c",
+    "src/qs8-igemm/gen/4x16c8-minmax-neon-mlal-padal.c",
+    "src/qs8-igemm/gen/4x16c8-minmax-neon-mull-padal.c",
+    "src/qs8-igemm/gen/4x16c16-minmax-neon-mlal-padal.c",
     "src/qs8-requantization/fp32-neon.c",
     "src/qs8-requantization/precise-neon.c",
     "src/qs8-requantization/q31-neon.c",
@@ -1776,6 +1878,8 @@ NEONFMA_UKERNELS = [
     "src/f32-gemm/gen/6x8-minmax-neonfma-dup-ld128.c",
     "src/f32-gemm/gen/6x8s4-minmax-neonfma.c",
     "src/f32-gemm/gen/8x8s4-minmax-neonfma.c",
+    "src/f32-ibilinear-chw/gen/neonfma-p4.c",
+    "src/f32-ibilinear-chw/gen/neonfma-p8.c",
     "src/f32-ibilinear/gen/neonfma-c4.c",
     "src/f32-ibilinear/gen/neonfma-c8.c",
     "src/f32-igemm/gen/1x8-minmax-neonfma-dup-ld64.c",
@@ -2172,7 +2276,6 @@ NEONDOT_UKERNELS = [
     "src/qs8-gemm/gen/6x16c4-minmax-neondot.c",
     "src/qs8-gemm/gen/8x8c4-minmax-neondot.c",
     "src/qs8-gemm/gen/8x16c4-minmax-neondot.c",
-    "src/qs8-gemm/gen/12x8c4-minmax-neondot.c",
     "src/qs8-igemm/gen/1x8c4-minmax-neondot.c",
     "src/qs8-igemm/gen/1x16c4-minmax-neondot.c",
     "src/qs8-igemm/gen/4x8c4-minmax-neondot.c",
@@ -2181,7 +2284,6 @@ NEONDOT_UKERNELS = [
     "src/qs8-igemm/gen/6x16c4-minmax-neondot.c",
     "src/qs8-igemm/gen/8x8c4-minmax-neondot.c",
     "src/qs8-igemm/gen/8x16c4-minmax-neondot.c",
-    "src/qs8-igemm/gen/12x8c4-minmax-neondot.c",
 ]
 
 SSE_UKERNELS = [
@@ -3460,9 +3562,18 @@ AARCH64_ASM_UKERNELS = [
     "src/f32-igemm/gen/5x8-minmax-aarch64-neonfma-cortex-a75.S",
     "src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-cortex-a57.S",
     "src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-cortex-a75.S",
+    "src/qs8-gemm/1x16c4-aarch64-neondot-ld32.S",
     "src/qs8-gemm/1x16c4-aarch64-neondot-ld64.S",
+    "src/qs8-gemm/2x8c8-aarch64-neon-mull-padal.S",
+    "src/qs8-gemm/2x8c8-aarch64-neon-mlal-padal.S",
+    "src/qs8-gemm/2x8c16-aarch64-neon-mlal-padal.S",
     "src/qs8-gemm/4x16c4-aarch64-neondot-cortex-a55.S",
+    "src/qs8-gemm/4x16c4-aarch64-neondot-ld32.S",
     "src/qs8-gemm/4x16c4-aarch64-neondot-ld64.S",
+    "src/qs8-igemm/2x8c8-aarch64-neon-mlal-padal.S",
+    "src/qs8-igemm/2x8c16-aarch64-neon-mlal-padal.S",
+    "src/qs8-igemm/4x16c4-aarch64-neondot-cortex-a55.S",
+    "src/qs8-igemm/4x16c4-aarch64-neondot-ld64.S",
 ]
 
 INTERNAL_MICROKERNEL_HDRS = [
@@ -5228,6 +5339,18 @@ cc_library(
 )
 
 cc_library(
+    name = "fp32_sparse_mobilenet_v1",
+    srcs = ["models/fp32-sparse-mobilenet-v1.cc"],
+    hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
+    linkstatic = True,
+    deps = [
+        ":XNNPACK",
+        "@pthreadpool",
+    ],
+)
+
+cc_library(
     name = "fp16_mobilenet_v1",
     srcs = ["models/fp16-mobilenet-v1.cc"],
     hdrs = ["models/models.h"],
@@ -5265,8 +5388,32 @@ cc_library(
 )
 
 cc_library(
+    name = "qu8_mobilenet_v1",
+    srcs = ["models/qu8-mobilenet-v1.cc"],
+    hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
+    linkstatic = True,
+    deps = [
+        ":XNNPACK",
+        "@pthreadpool",
+    ],
+)
+
+cc_library(
     name = "fp32_mobilenet_v2",
     srcs = ["models/fp32-mobilenet-v2.cc"],
+    hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
+    linkstatic = True,
+    deps = [
+        ":XNNPACK",
+        "@pthreadpool",
+    ],
+)
+
+cc_library(
+    name = "fp32_sparse_mobilenet_v2",
+    srcs = ["models/fp32-sparse-mobilenet-v2.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
     linkstatic = True,
@@ -5302,6 +5449,18 @@ cc_library(
 )
 
 cc_library(
+    name = "fp32_sparse_mobilenet_v3_large",
+    srcs = ["models/fp32-sparse-mobilenet-v3-large.cc"],
+    hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
+    linkstatic = True,
+    deps = [
+        ":XNNPACK",
+        "@pthreadpool",
+    ],
+)
+
+cc_library(
     name = "fp16_mobilenet_v3_large",
     srcs = ["models/fp16-mobilenet-v3-large.cc"],
     hdrs = ["models/models.h"],
@@ -5317,6 +5476,18 @@ cc_library(
 cc_library(
     name = "fp32_mobilenet_v3_small",
     srcs = ["models/fp32-mobilenet-v3-small.cc"],
+    hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
+    linkstatic = True,
+    deps = [
+        ":XNNPACK",
+        "@pthreadpool",
+    ],
+)
+
+cc_library(
+    name = "fp32_sparse_mobilenet_v3_small",
+    srcs = ["models/fp32-sparse-mobilenet-v3-small.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
     linkstatic = True,
@@ -5370,6 +5541,19 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qs8_gemm_e2e_bench",
+    srcs = [
+        "bench/qs8-gemm-e2e.cc",
+        "bench/end2end.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":XNNPACK",
+        ":qs8_mobilenet_v1",
+        ":qs8_mobilenet_v2",
+    ],
+)
+
+xnnpack_benchmark(
     name = "end2end_bench",
     srcs = ["bench/end2end.cc"],
     deps = [
@@ -5383,8 +5567,13 @@ xnnpack_benchmark(
         ":fp32_mobilenet_v2",
         ":fp32_mobilenet_v3_large",
         ":fp32_mobilenet_v3_small",
+        ":fp32_sparse_mobilenet_v1",
+        ":fp32_sparse_mobilenet_v2",
+        ":fp32_sparse_mobilenet_v3_large",
+        ":fp32_sparse_mobilenet_v3_small",
         ":qs8_mobilenet_v1",
         ":qs8_mobilenet_v2",
+        ":qu8_mobilenet_v1",
         "@pthreadpool",
     ],
 )
@@ -6783,6 +6972,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "add_nd_test",
+    timeout = "moderate",
     srcs = [
         "test/add-nd.cc",
         "test/binary-elementwise-operator-tester.h",
@@ -6855,6 +7045,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "convolution_nhwc_test",
+    timeout = "moderate",
     srcs = [
         "test/convolution-nhwc.cc",
         "test/convolution-operator-tester.h",
@@ -6864,6 +7055,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "convolution_nchw_test",
+    timeout = "moderate",
     srcs = [
         "test/convolution-nchw.cc",
         "test/convolution-operator-tester.h",
@@ -6982,6 +7174,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "max_pooling_nhwc_test",
+    timeout = "moderate",
     srcs = [
         "test/max-pooling-nhwc.cc",
         "test/max-pooling-operator-tester.h",
@@ -7314,14 +7507,22 @@ config_setting(
 )
 
 config_setting(
+    name = "macos_arm64",
+    values = {
+        "apple_platform_type": "macos",
+        "cpu": "darwin_arm64",
+    },
+)
+
+config_setting(
     name = "emscripten",
-    values = {"crosstool_top": "//toolchain:emscripten"},
+    values = {"crosstool_top": "//emscripten_toolchain:everything"},
 )
 
 config_setting(
     name = "emscripten_wasm",
     values = {
-        "crosstool_top": "//toolchain:emscripten",
+        "crosstool_top": "//emscripten_toolchain:everything",
         "cpu": "wasm",
     },
 )
@@ -7329,7 +7530,7 @@ config_setting(
 config_setting(
     name = "emscripten_wasmsimd",
     values = {
-        "crosstool_top": "//toolchain:emscripten",
+        "crosstool_top": "//emscripten_toolchain:everything",
         "cpu": "wasm",
         "copt": "-msimd128",
     },
