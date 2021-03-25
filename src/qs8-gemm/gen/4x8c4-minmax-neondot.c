@@ -7,18 +7,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-
 #include <assert.h>
 
 #include <arm_neon.h>
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
 
 
-// This kernel uses ARMv8.2 dot-product instructions.
-//
-// Scalar model: xnn_qs8_gemm_minmax_ukernel_4x8c4__scalar. Refer to
-// that kernel for more comments.
 void xnn_qs8_gemm_minmax_ukernel_4x8c4__neondot(
     size_t mr,
     size_t nc,
@@ -34,7 +30,12 @@ void xnn_qs8_gemm_minmax_ukernel_4x8c4__neondot(
   assert(mr <= 4);
   assert(nc != 0);
   assert(kc != 0);
+  assert(kc % sizeof(int8_t) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
 
+  kc = round_up_po2(kc, 4);
   const int8_t* a0 = a;
   int8_t* c0 = c;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
@@ -80,10 +81,10 @@ void xnn_qs8_gemm_minmax_ukernel_4x8c4__neondot(
       const int8x8_t va3x01234567 = vld1_s8(a3); a3 += 8;
 
       // Load a 8x8 block of weights.
-      const int8x16_t vb0123x0123 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
-      const int8x16_t vb0123x4567 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
-      const int8x16_t vb4567x0123 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
-      const int8x16_t vb4567x4567 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+      const int8x16_t vb0123x0123 = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
+      const int8x16_t vb0123x4567 = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
+      const int8x16_t vb4567x0123 = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
+      const int8x16_t vb4567x4567 = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
 
       // Multiply-accumulate: 4x8 * 8x8 --> 4x8.
       vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb0123x0123, va0x01234567, 0);
@@ -105,17 +106,17 @@ void xnn_qs8_gemm_minmax_ukernel_4x8c4__neondot(
 
       k -= 8 * sizeof(int8_t);
     }
-    // Handle up to 7 final positions of `k`
+    // Handle up to 4 final positions of `k`
     if XNN_UNLIKELY(k != 0) {
       // Load a 4x4 block of activations.
-      const int8x8_t va0x01234567 = vld1_s8(a0); a0 += k;
-      const int8x8_t va1x01234567 = vld1_s8(a1); a1 += k;
-      const int8x8_t va2x01234567 = vld1_s8(a2); a2 += k;
-      const int8x8_t va3x01234567 = vld1_s8(a3); a3 += k;
+      const int8x8_t va0x01234567 = vld1_s8(a0); a0 += 4;
+      const int8x8_t va1x01234567 = vld1_s8(a1); a1 += 4;
+      const int8x8_t va2x01234567 = vld1_s8(a2); a2 += 4;
+      const int8x8_t va3x01234567 = vld1_s8(a3); a3 += 4;
 
       // Load a 4x8 block of weights.
-      const int8x16_t vb0123x0123 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
-      const int8x16_t vb0123x4567 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+      const int8x16_t vb0123x0123 = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
+      const int8x16_t vb0123x4567 = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
 
       // Multiply-accumulate: 4x4 * 4x8 --> 4x8.
       vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb0123x0123, va0x01234567, 0);
@@ -126,32 +127,9 @@ void xnn_qs8_gemm_minmax_ukernel_4x8c4__neondot(
       vacc2x4567 = vdotq_lane_s32(vacc2x4567, vb0123x4567, va2x01234567, 0);
       vacc3x0123 = vdotq_lane_s32(vacc3x0123, vb0123x0123, va3x01234567, 0);
       vacc3x4567 = vdotq_lane_s32(vacc3x4567, vb0123x4567, va3x01234567, 0);
-
-      if (k > 4) {
-        // Load a 4x8 block of weights.
-        const int8x16_t vb4567x0123 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
-        const int8x16_t vb4567x4567 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
-
-        // Multiply-accumulate: 4x4 * 4x8 --> 4x8.
-        vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb4567x0123, va0x01234567, 1);
-        vacc0x4567 = vdotq_lane_s32(vacc0x4567, vb4567x4567, va0x01234567, 1);
-        vacc1x0123 = vdotq_lane_s32(vacc1x0123, vb4567x0123, va1x01234567, 1);
-        vacc1x4567 = vdotq_lane_s32(vacc1x4567, vb4567x4567, va1x01234567, 1);
-        vacc2x0123 = vdotq_lane_s32(vacc2x0123, vb4567x0123, va2x01234567, 1);
-        vacc2x4567 = vdotq_lane_s32(vacc2x4567, vb4567x4567, va2x01234567, 1);
-        vacc3x0123 = vdotq_lane_s32(vacc3x0123, vb4567x0123, va3x01234567, 1);
-        vacc3x4567 = vdotq_lane_s32(vacc3x4567, vb4567x4567, va3x01234567, 1);
-      }
     }
-    // End of accumulation loop. The variable `kc` contains the amount by which
-    // we advanced the `va` pointers, so we rewind by this amount now.
-    a0 = (const int8_t*)((uintptr_t)a0 - kc);
-    a1 = (const int8_t*)((uintptr_t)a1 - kc);
-    a2 = (const int8_t*)((uintptr_t)a2 - kc);
-    a3 = (const int8_t*)((uintptr_t)a3 - kc);
 
     // Post-accumulation work
-
     const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
     const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
 
@@ -221,6 +199,11 @@ void xnn_qs8_gemm_minmax_ukernel_4x8c4__neondot(
       c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
       c2 = (int8_t*) ((uintptr_t) c2 + cn_stride);
       c3 = (int8_t*) ((uintptr_t) c3 + cn_stride);
+
+      a0 = (const int8_t*) ((uintptr_t) a0 - kc);
+      a1 = (const int8_t*) ((uintptr_t) a1 - kc);
+      a2 = (const int8_t*) ((uintptr_t) a2 - kc);
+      a3 = (const int8_t*) ((uintptr_t) a3 - kc);
 
       nc -= 8;
     } else {
