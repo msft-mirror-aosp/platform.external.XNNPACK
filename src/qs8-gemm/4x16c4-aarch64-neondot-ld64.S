@@ -8,7 +8,7 @@
 # void xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
-#     size_t kc,                 x2 / x0 / x10
+#     size_t kc,                 x2 / x0
 #     const int8_t* restrict a,  x3
 #     size_t a_stride,           x4
 #     const void* restrict w,    x5
@@ -35,10 +35,12 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
 
         # Clamp A and C pointers
         CMP      x0, 2             // if mr < 2
+        ADD      x2, x2, 3         // kc = (kc + 3) & ~3
         ADD     x15, x3, x4        // a1 = a0 + a_stride
         ADD      x8, x6, x7        // c1 = c0 + cm_stride
         CSEL    x15, x3, x15, LO   //   a1 = a0
         CSEL     x8, x6,  x8, LO   //   c1 = c0
+        BIC      x2, x2, 3
 
         ADD     x13, x15, x4       // a2 = a1 + a_stride
         ADD      x9,  x8, x7       // c2 = c1 + cm_stride
@@ -56,18 +58,17 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
 0:
         # Load initial bias from w into accumulators
         LDP     q16, q20, [x5], 32
-        SUBS    x0, x2, 8          // k = kc - 8
         MOV     v17.16b, v16.16b
         MOV     v18.16b, v16.16b
         LDP     q24, q28, [x5], 32
         MOV     v19.16b, v16.16b
         MOV     v21.16b, v20.16b
+        LDR     x11, [sp, 8]       // params
         MOV     v22.16b, v20.16b
         MOV     v23.16b, v20.16b
-        LDR     x11, [sp, 8]      // params
+        SUBS    x0, x2, 8          // k = kc - 8
         MOV     v25.16b, v24.16b
         MOV     v26.16b, v24.16b
-        AND     x10, x2, 7         // kc remainder 0 to 7
         MOV     v27.16b, v24.16b
         MOV     v29.16b, v28.16b
         MOV     v30.16b, v28.16b
@@ -79,23 +80,23 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         .p2align 3
 1:
         LDR     d0,  [x3], 8
-        LDR     q4, [x5], 16
+        LDR     q4,  [x5], 16
         LDR     d1, [x15], 8
         LDR     d2, [x13], 8
         LDR     d3,  [x4], 8
+        LDR     q5,  [x5], 16
         SDOT    v16.4s, v4.16b,  v0.4b[0]
-        LDR     q5, [x5], 16
         SDOT    v17.4s, v4.16b,  v1.4b[0]
+        LDP     q6, q7, [x5], 32
         SDOT    v18.4s, v4.16b,  v2.4b[0]
         SDOT    v19.4s, v4.16b,  v3.4b[0]
         SDOT    v20.4s, v5.16b,  v0.4b[0]
-        LDP     q6, q7, [x5], 32
         SDOT    v21.4s, v5.16b,  v1.4b[0]
         SDOT    v22.4s, v5.16b,  v2.4b[0]
         SDOT    v23.4s, v5.16b,  v3.4b[0]
         SDOT    v24.4s, v6.16b, v0.4b[0]
-        LDP      q4,  q5, [x5], 32
         SDOT    v25.4s, v6.16b, v1.4b[0]
+        LDP     q4, q5, [x5], 32
         SDOT    v26.4s, v6.16b, v2.4b[0]
         SDOT    v27.4s, v6.16b, v3.4b[0]
         SDOT    v28.4s, v7.16b, v0.4b[0]
@@ -103,8 +104,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         SDOT    v30.4s, v7.16b, v2.4b[0]
         SDOT    v31.4s, v7.16b, v3.4b[0]
         SDOT    v16.4s, v4.16b,  v0.4b[1]
-        LDP      q6,  q7, [x5], 32
         SDOT    v17.4s, v4.16b,  v1.4b[1]
+        LDP     q6, q7, [x5], 32
         SDOT    v18.4s, v4.16b,  v2.4b[1]
         SDOT    v19.4s, v4.16b,  v3.4b[1]
         SDOT    v20.4s, v5.16b,  v0.4b[1]
@@ -118,18 +119,16 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         SDOT    v28.4s, v7.16b,  v0.4b[1]
         SDOT    v29.4s, v7.16b,  v1.4b[1]
         SDOT    v30.4s, v7.16b,  v2.4b[1]
-        SDOT    v31.4s, v7.16b,  v3.4b[1]
         SUBS    x0, x0, 8
+        SDOT    v31.4s, v7.16b,  v3.4b[1]
         B.HS    1b
 
-        # Is there a remainder?- 1 to 7 bytes of A
-        CBNZ    x10, 3f
+        # Is there a remainder?- 4 bytes of A
+        TBNZ    x0, 2, 3f
 
-        .p2align 3
 2:
         # Apply params - scale, shift, bias and clamp
-        LD1R    {v0.4s}, [x11], 4
-        LD1R    {v1.4s}, [x11], 4
+        LD2R    {v0.4s, v1.4s}, [x11], 8
         CMEQ    v2.4s, v1.4s, 0
 
         BIC     v4.16b, v16.16b, v2.16b
@@ -272,21 +271,21 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         B.NE    0b
         RET
 
-        # Remainder- 1 to 7 bytes of A
+        # Remainder- 4 bytes of A
         .p2align 3
 3:
-        LD1     {v0.8b},  [x3], x10
-        LDP     q4, q5, [x5], 32
-        LD1     {v1.8b}, [x15], x10
-        LD1     {v2.8b}, [x13], x10
-        LD1     {v3.8b},  [x4], x10
-        CMP     x10, 4
+        LDR     s0,  [x3], 4
+        LDR     q4, [x5], 16
+        LDR     s1, [x15], 4
+        LDR     s2, [x13], 4
+        LDR     s3,  [x4], 4
         SDOT    v16.4s, v4.16b,  v0.4b[0]
+        LDR     q5, [x5], 16
         SDOT    v17.4s, v4.16b,  v1.4b[0]
         SDOT    v18.4s, v4.16b,  v2.4b[0]
         SDOT    v19.4s, v4.16b,  v3.4b[0]
-        LDP     q6, q7, [x5], 32
         SDOT    v20.4s, v5.16b,  v0.4b[0]
+        LDP     q6, q7, [x5], 32
         SDOT    v21.4s, v5.16b,  v1.4b[0]
         SDOT    v22.4s, v5.16b,  v2.4b[0]
         SDOT    v23.4s, v5.16b,  v3.4b[0]
@@ -298,25 +297,6 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         SDOT    v29.4s, v7.16b, v1.4b[0]
         SDOT    v30.4s, v7.16b, v2.4b[0]
         SDOT    v31.4s, v7.16b, v3.4b[0]
-        B.LS    2b
-        LDP      q4,  q5, [x5], 32
-        SDOT    v16.4s, v4.16b,  v0.4b[1]
-        SDOT    v17.4s, v4.16b,  v1.4b[1]
-        SDOT    v18.4s, v4.16b,  v2.4b[1]
-        SDOT    v19.4s, v4.16b,  v3.4b[1]
-        LDP      q6,  q7, [x5], 32
-        SDOT    v20.4s, v5.16b,  v0.4b[1]
-        SDOT    v21.4s, v5.16b,  v1.4b[1]
-        SDOT    v22.4s, v5.16b,  v2.4b[1]
-        SDOT    v23.4s, v5.16b,  v3.4b[1]
-        SDOT    v24.4s, v6.16b,  v0.4b[1]
-        SDOT    v25.4s, v6.16b,  v1.4b[1]
-        SDOT    v26.4s, v6.16b,  v2.4b[1]
-        SDOT    v27.4s, v6.16b,  v3.4b[1]
-        SDOT    v28.4s, v7.16b,  v0.4b[1]
-        SDOT    v29.4s, v7.16b,  v1.4b[1]
-        SDOT    v30.4s, v7.16b,  v2.4b[1]
-        SDOT    v31.4s, v7.16b,  v3.4b[1]
         B       2b
 
         # Store odd width
