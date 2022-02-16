@@ -27,7 +27,7 @@
       .n(1)
       .k(1)
       .sparsity(0.0f)
-      .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+      .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith);
   }
 
   TEST(F16_SPMM_MINMAX_8X1__NEONFP16ARITH, k_gt_1) {
@@ -40,7 +40,7 @@
         .n(1)
         .k(k)
         .sparsity(0.0f)
-        .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+        .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith);
     }
   }
 
@@ -55,7 +55,7 @@
           .n(n)
           .k(k)
           .sparsity(0.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith);
       }
     }
   }
@@ -72,7 +72,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith);
         }
       }
     }
@@ -90,7 +90,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith);
         }
       }
     }
@@ -108,7 +108,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith);
         }
       }
     }
@@ -126,7 +126,7 @@
           .k(k)
           .output_stride(19)
           .sparsity(0.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith);
       }
     }
   }
@@ -143,7 +143,7 @@
           .k(k)
           .sparsity(0.0f)
           .qmin(128)
-          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith);
       }
     }
   }
@@ -160,7 +160,7 @@
           .k(k)
           .sparsity(0.0f)
           .qmax(128)
-          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith);
       }
     }
   }
@@ -176,7 +176,7 @@
           .n(n)
           .k(k)
           .sparsity(0.5f)
-          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith);
       }
     }
   }
@@ -192,7 +192,7 @@
           .n(n)
           .k(k)
           .sparsity(1.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith);
       }
     }
   }
@@ -209,7 +209,7 @@
       .n(1)
       .k(2)
       .sparsity(0.0f)
-      .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+      .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2);
   }
 
   TEST(F16_SPMM_MINMAX_8X1__NEONFP16ARITH_X2, k_lt_2) {
@@ -222,7 +222,7 @@
         .n(1)
         .k(k)
         .sparsity(0.0f)
-        .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+        .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2);
     }
   }
 
@@ -236,7 +236,7 @@
         .n(1)
         .k(k)
         .sparsity(0.0f)
-        .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+        .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2);
     }
   }
 
@@ -250,7 +250,7 @@
         .n(1)
         .k(k)
         .sparsity(0.0f)
-        .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+        .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2);
     }
   }
 
@@ -265,7 +265,7 @@
           .n(n)
           .k(k)
           .sparsity(0.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2);
       }
     }
   }
@@ -282,7 +282,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2);
         }
       }
     }
@@ -300,7 +300,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2);
         }
       }
     }
@@ -318,7 +318,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2);
         }
       }
     }
@@ -336,7 +336,7 @@
           .k(k)
           .output_stride(19)
           .sparsity(0.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2);
       }
     }
   }
@@ -353,7 +353,7 @@
           .k(k)
           .sparsity(0.0f)
           .qmin(128)
-          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2);
       }
     }
   }
@@ -370,7 +370,7 @@
           .k(k)
           .sparsity(0.0f)
           .qmax(128)
-          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2);
       }
     }
   }
@@ -386,7 +386,7 @@
           .n(n)
           .k(k)
           .sparsity(0.5f)
-          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2);
       }
     }
   }
@@ -402,7 +402,7 @@
           .n(n)
           .k(k)
           .sparsity(1.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2);
       }
     }
   }
@@ -419,7 +419,7 @@
       .n(1)
       .k(1)
       .sparsity(0.0f)
-      .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+      .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith);
   }
 
   TEST(F16_SPMM_MINMAX_16X1__NEONFP16ARITH, k_gt_1) {
@@ -432,7 +432,7 @@
         .n(1)
         .k(k)
         .sparsity(0.0f)
-        .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+        .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith);
     }
   }
 
@@ -447,7 +447,7 @@
           .n(n)
           .k(k)
           .sparsity(0.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith);
       }
     }
   }
@@ -464,7 +464,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith);
         }
       }
     }
@@ -482,7 +482,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith);
         }
       }
     }
@@ -500,7 +500,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith);
         }
       }
     }
@@ -518,7 +518,7 @@
           .k(k)
           .output_stride(37)
           .sparsity(0.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith);
       }
     }
   }
@@ -535,7 +535,7 @@
           .k(k)
           .sparsity(0.0f)
           .qmin(128)
-          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith);
       }
     }
   }
@@ -552,7 +552,7 @@
           .k(k)
           .sparsity(0.0f)
           .qmax(128)
-          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith);
       }
     }
   }
@@ -568,7 +568,7 @@
           .n(n)
           .k(k)
           .sparsity(0.5f)
-          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith);
       }
     }
   }
@@ -584,7 +584,7 @@
           .n(n)
           .k(k)
           .sparsity(1.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith);
       }
     }
   }
@@ -601,7 +601,7 @@
       .n(1)
       .k(2)
       .sparsity(0.0f)
-      .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+      .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2);
   }
 
   TEST(F16_SPMM_MINMAX_16X1__NEONFP16ARITH_X2, k_lt_2) {
@@ -614,7 +614,7 @@
         .n(1)
         .k(k)
         .sparsity(0.0f)
-        .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+        .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2);
     }
   }
 
@@ -628,7 +628,7 @@
         .n(1)
         .k(k)
         .sparsity(0.0f)
-        .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+        .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2);
     }
   }
 
@@ -642,7 +642,7 @@
         .n(1)
         .k(k)
         .sparsity(0.0f)
-        .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+        .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2);
     }
   }
 
@@ -657,7 +657,7 @@
           .n(n)
           .k(k)
           .sparsity(0.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2);
       }
     }
   }
@@ -674,7 +674,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2);
         }
       }
     }
@@ -692,7 +692,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2);
         }
       }
     }
@@ -710,7 +710,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2);
         }
       }
     }
@@ -728,7 +728,7 @@
           .k(k)
           .output_stride(37)
           .sparsity(0.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2);
       }
     }
   }
@@ -745,7 +745,7 @@
           .k(k)
           .sparsity(0.0f)
           .qmin(128)
-          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2);
       }
     }
   }
@@ -762,7 +762,7 @@
           .k(k)
           .sparsity(0.0f)
           .qmax(128)
-          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2);
       }
     }
   }
@@ -778,7 +778,7 @@
           .n(n)
           .k(k)
           .sparsity(0.5f)
-          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2);
       }
     }
   }
@@ -794,7 +794,7 @@
           .n(n)
           .k(k)
           .sparsity(1.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2);
       }
     }
   }
@@ -811,7 +811,7 @@
       .n(1)
       .k(1)
       .sparsity(0.0f)
-      .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+      .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith);
   }
 
   TEST(F16_SPMM_MINMAX_24X1__NEONFP16ARITH, k_gt_1) {
@@ -824,7 +824,7 @@
         .n(1)
         .k(k)
         .sparsity(0.0f)
-        .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+        .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith);
     }
   }
 
@@ -839,7 +839,7 @@
           .n(n)
           .k(k)
           .sparsity(0.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith);
       }
     }
   }
@@ -856,7 +856,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith);
         }
       }
     }
@@ -874,7 +874,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith);
         }
       }
     }
@@ -892,7 +892,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith);
         }
       }
     }
@@ -910,7 +910,7 @@
           .k(k)
           .output_stride(53)
           .sparsity(0.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith);
       }
     }
   }
@@ -927,7 +927,7 @@
           .k(k)
           .sparsity(0.0f)
           .qmin(128)
-          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith);
       }
     }
   }
@@ -944,7 +944,7 @@
           .k(k)
           .sparsity(0.0f)
           .qmax(128)
-          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith);
       }
     }
   }
@@ -960,7 +960,7 @@
           .n(n)
           .k(k)
           .sparsity(0.5f)
-          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith);
       }
     }
   }
@@ -976,7 +976,7 @@
           .n(n)
           .k(k)
           .sparsity(1.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith);
       }
     }
   }
@@ -993,7 +993,7 @@
       .n(1)
       .k(2)
       .sparsity(0.0f)
-      .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+      .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2);
   }
 
   TEST(F16_SPMM_MINMAX_24X1__NEONFP16ARITH_X2, k_lt_2) {
@@ -1006,7 +1006,7 @@
         .n(1)
         .k(k)
         .sparsity(0.0f)
-        .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+        .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2);
     }
   }
 
@@ -1020,7 +1020,7 @@
         .n(1)
         .k(k)
         .sparsity(0.0f)
-        .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+        .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2);
     }
   }
 
@@ -1034,7 +1034,7 @@
         .n(1)
         .k(k)
         .sparsity(0.0f)
-        .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+        .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2);
     }
   }
 
@@ -1049,7 +1049,7 @@
           .n(n)
           .k(k)
           .sparsity(0.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2);
       }
     }
   }
@@ -1066,7 +1066,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2);
         }
       }
     }
@@ -1084,7 +1084,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2);
         }
       }
     }
@@ -1102,7 +1102,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2);
         }
       }
     }
@@ -1120,7 +1120,7 @@
           .k(k)
           .output_stride(53)
           .sparsity(0.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2);
       }
     }
   }
@@ -1137,7 +1137,7 @@
           .k(k)
           .sparsity(0.0f)
           .qmin(128)
-          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2);
       }
     }
   }
@@ -1154,7 +1154,7 @@
           .k(k)
           .sparsity(0.0f)
           .qmax(128)
-          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2);
       }
     }
   }
@@ -1170,7 +1170,7 @@
           .n(n)
           .k(k)
           .sparsity(0.5f)
-          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2);
       }
     }
   }
@@ -1186,7 +1186,7 @@
           .n(n)
           .k(k)
           .sparsity(1.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2);
       }
     }
   }
@@ -1203,7 +1203,7 @@
       .n(1)
       .k(1)
       .sparsity(0.0f)
-      .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+      .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith);
   }
 
   TEST(F16_SPMM_MINMAX_32X1__NEONFP16ARITH, k_gt_1) {
@@ -1216,7 +1216,7 @@
         .n(1)
         .k(k)
         .sparsity(0.0f)
-        .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+        .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith);
     }
   }
 
@@ -1231,7 +1231,7 @@
           .n(n)
           .k(k)
           .sparsity(0.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith);
       }
     }
   }
@@ -1248,7 +1248,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith);
         }
       }
     }
@@ -1266,7 +1266,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith);
         }
       }
     }
@@ -1284,7 +1284,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith);
         }
       }
     }
@@ -1302,7 +1302,7 @@
           .k(k)
           .output_stride(67)
           .sparsity(0.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith);
       }
     }
   }
@@ -1319,7 +1319,7 @@
           .k(k)
           .sparsity(0.0f)
           .qmin(128)
-          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith);
       }
     }
   }
@@ -1336,7 +1336,7 @@
           .k(k)
           .sparsity(0.0f)
           .qmax(128)
-          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith);
       }
     }
   }
@@ -1352,7 +1352,7 @@
           .n(n)
           .k(k)
           .sparsity(0.5f)
-          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith);
       }
     }
   }
@@ -1368,7 +1368,7 @@
           .n(n)
           .k(k)
           .sparsity(1.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith);
       }
     }
   }
@@ -1385,7 +1385,7 @@
       .n(1)
       .k(2)
       .sparsity(0.0f)
-      .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+      .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2);
   }
 
   TEST(F16_SPMM_MINMAX_32X1__NEONFP16ARITH_X2, k_lt_2) {
@@ -1398,7 +1398,7 @@
         .n(1)
         .k(k)
         .sparsity(0.0f)
-        .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+        .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2);
     }
   }
 
@@ -1412,7 +1412,7 @@
         .n(1)
         .k(k)
         .sparsity(0.0f)
-        .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+        .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2);
     }
   }
 
@@ -1426,7 +1426,7 @@
         .n(1)
         .k(k)
         .sparsity(0.0f)
-        .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+        .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2);
     }
   }
 
@@ -1441,7 +1441,7 @@
           .n(n)
           .k(k)
           .sparsity(0.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2);
       }
     }
   }
@@ -1458,7 +1458,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2);
         }
       }
     }
@@ -1476,7 +1476,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2);
         }
       }
     }
@@ -1494,7 +1494,7 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+            .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2);
         }
       }
     }
@@ -1512,7 +1512,7 @@
           .k(k)
           .output_stride(67)
           .sparsity(0.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2);
       }
     }
   }
@@ -1529,7 +1529,7 @@
           .k(k)
           .sparsity(0.0f)
           .qmin(128)
-          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2);
       }
     }
   }
@@ -1546,7 +1546,7 @@
           .k(k)
           .sparsity(0.0f)
           .qmax(128)
-          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2);
       }
     }
   }
@@ -1562,7 +1562,7 @@
           .n(n)
           .k(k)
           .sparsity(0.5f)
-          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2);
       }
     }
   }
@@ -1578,7 +1578,7 @@
           .n(n)
           .k(k)
           .sparsity(1.0f)
-          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2, xnn_init_f16_scaleminmax_neon_params);
+          .Test(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2);
       }
     }
   }

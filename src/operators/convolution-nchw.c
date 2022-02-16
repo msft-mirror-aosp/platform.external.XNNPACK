@@ -492,14 +492,13 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
   convolution_op->output_pixel_stride = output_channel_stride;
 
   if (ukernel_type == xnn_ukernel_type_dwconv) {
-    xnn_init_f32_chw_params(&convolution_op->params.f32_chw, 0, output_min, output_max);
+    convolution_op->params.f32_chw = xnn_init_f32_chw_params(0, output_min, output_max);
   } else {
-    xnn_init_f32_minmax_params(&convolution_op->params.f32_minmax, output_min, output_max);
+    convolution_op->params.f32_minmax = xnn_init_f32_minmax_params(output_min, output_max);
   }
 
   convolution_op->type = xnn_operator_type_convolution_nchw_f32;
   convolution_op->ukernel.type = ukernel_type;
-  convolution_op->flags = flags;
 
   convolution_op->state = xnn_run_state_invalid;
 
@@ -523,7 +522,7 @@ static enum xnn_status setup_convolution2d_nchw(
   uint32_t bias_element_size,
   uint32_t log2_output_element_size,
   const void* params,
-  void* chw_params,
+  const void* chw_params,
   size_t num_threads)
 {
   convolution_op->state = xnn_run_state_invalid;

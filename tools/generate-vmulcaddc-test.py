@@ -205,7 +205,7 @@ TEST(${TEST_NAME}, qmax) {
 """
 
 
-def generate_test_cases(ukernel, channel_tile, row_tile, init_fn, isa):
+def generate_test_cases(ukernel, channel_tile, row_tile, isa):
   """Generates all tests cases for a VMULCADDC micro-kernel.
 
   Args:
@@ -214,7 +214,6 @@ def generate_test_cases(ukernel, channel_tile, row_tile, init_fn, isa):
                   loop of the micro-kernel.
     row_tile: Number of rows processed per one iteration of the outer loop of
               the micro-kernel.
-    init_fn: C name of the function to initialize microkernel parameters.
     isa: instruction set required to run the micro-kernel. Generated unit test
          will skip execution if the host processor doesn't support this ISA.
 
@@ -224,8 +223,8 @@ def generate_test_cases(ukernel, channel_tile, row_tile, init_fn, isa):
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
   test_args = [ukernel]
-  if init_fn:
-    test_args.append(init_fn)
+  if not isa:
+    test_args.append("VMulCAddCMicrokernelTester::Variant::Scalar")
   return xngen.preprocess(VMULCADDC_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
@@ -267,24 +266,16 @@ def main(args):
 
     for ukernel_spec in spechannels_yaml:
       name = ukernel_spec["name"]
-      init_fn = ukernel_spec.get("init")
       channel_tile, row_tile, arch, isa = split_ukernel_name(name)
 
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
-      test_case = generate_test_cases(
-        name, channel_tile, row_tile, init_fn, isa)
+      test_case = generate_test_cases(name, channel_tile, row_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
-    txt_changed = True
-    if os.path.exists(options.output):
-      with codecs.open(options.output, "r", encoding="utf-8") as output_file:
-        txt_changed = output_file.read() != tests
-
-    if txt_changed:
-      with codecs.open(options.output, "w", encoding="utf-8") as output_file:
-        output_file.write(tests)
+    with codecs.open(options.output, "w", encoding="utf-8") as output_file:
+      output_file.write(tests)
 
 
 if __name__ == "__main__":
