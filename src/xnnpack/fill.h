@@ -20,14 +20,15 @@ extern "C" {
   XNN_INTERNAL void fn_name(                   \
     size_t kernel_elements,                    \
     size_t channels,                           \
-    void* output,                              \
+    uint32_t* output,                          \
     size_t output_stride,                      \
-    const uint32_t fill_pattern);
+    const uint32_t* fill_value);
 
-DECLARE_FILL_UKERNEL_FUNCTION(xnn_xx_fill_ukernel__sse2_x64)
-DECLARE_FILL_UKERNEL_FUNCTION(xnn_xx_fill_ukernel__neon_x64)
-DECLARE_FILL_UKERNEL_FUNCTION(xnn_xx_fill_ukernel__wasmsimd_x64)
-DECLARE_FILL_UKERNEL_FUNCTION(xnn_xx_fill_ukernel__scalar_x16)
+DECLARE_FILL_UKERNEL_FUNCTION(xnn_x32_fill_ukernel__sse)
+DECLARE_FILL_UKERNEL_FUNCTION(xnn_x32_fill_ukernel__neon)
+DECLARE_FILL_UKERNEL_FUNCTION(xnn_x32_fill_ukernel__wasmsimd)
+DECLARE_FILL_UKERNEL_FUNCTION(xnn_x32_fill_ukernel__scalar_float)
+DECLARE_FILL_UKERNEL_FUNCTION(xnn_x32_fill_ukernel__scalar_int)
 
 
 #ifdef __cplusplus
