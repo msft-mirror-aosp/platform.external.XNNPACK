@@ -20,7 +20,7 @@ void xnn_f32_vmul_minmax_ukernel__wasmsimd_x86_x4(
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
@@ -28,8 +28,8 @@ void xnn_f32_vmul_minmax_ukernel__wasmsimd_x86_x4(
   assert(b != NULL);
   assert(y != NULL);
 
-  const v128_t vy_min = wasm_v128_load64_splat(params->wasmsimd.min);
-  const v128_t vy_max = wasm_v128_load64_splat(params->wasmsimd.max);
+  const v128_t vy_min = wasm_v32x4_load_splat(&params->scalar.min);
+  const v128_t vy_max = wasm_v32x4_load_splat(&params->scalar.max);
 
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const v128_t va0123 = wasm_v128_load(a);
@@ -41,9 +41,12 @@ void xnn_f32_vmul_minmax_ukernel__wasmsimd_x86_x4(
     v128_t vy0123 = wasm_f32x4_mul(va0123, vb0123);
 
 
-    vy0123 = wasm_f32x4_pmax(vy_min, vy0123);
+    const v128_t vltmask0123 = wasm_f32x4_lt(vy0123, vy_min);
 
-    vy0123 = wasm_f32x4_pmin(vy_max, vy0123);
+    const v128_t vngtmask0123 = wasm_f32x4_le(vy0123, vy_max);
+    vy0123 = wasm_v128_bitselect(vy_min, vy0123, vltmask0123);
+
+    vy0123 = wasm_v128_bitselect(vy0123, vy_max, vngtmask0123);
 
     wasm_v128_store(y, vy0123);
     y += 4;
@@ -54,8 +57,10 @@ void xnn_f32_vmul_minmax_ukernel__wasmsimd_x86_x4(
 
     v128_t vy = wasm_f32x4_mul(va, vb);
 
-    vy = wasm_f32x4_pmax(vy_min, vy);
-    vy = wasm_f32x4_pmin(vy_max, vy);
+    const v128_t vltmask = wasm_f32x4_lt(vy, vy_min);
+    const v128_t vngtmask = wasm_f32x4_le(vy, vy_max);
+    vy = wasm_v128_bitselect(vy_min, vy, vltmask);
+    vy = wasm_v128_bitselect(vy, vy_max, vngtmask);
 
     if (n & (2 * sizeof(float))) {
       *((double*) y) = wasm_f64x2_extract_lane(vy, 0);
