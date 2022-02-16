@@ -7,7 +7,6 @@
 import argparse
 import codecs
 import io
-import os
 import re
 import sys
 from itertools import chain
@@ -135,16 +134,13 @@ def main(args):
 
   input_text = codecs.open(options.input[0], "r", encoding="utf-8").read()
   python_globals = dict(chain(*options.defines))
-  output_text = PREAMBLE.format(template=options.input[0], generator=sys.argv[0]) + preprocess(input_text, python_globals, options.input[0])
+  output_text = preprocess(input_text, python_globals, options.input[0])
 
-  txt_changed = True
-  if os.path.exists(options.output):
-    with codecs.open(options.output, "r", encoding="utf-8") as output_file:
-      txt_changed = output_file.read() != output_text
+  with codecs.open(options.output, "w", encoding="utf-8") as output_file:
+    output_file.write(PREAMBLE.format(
+      template=options.input[0], generator=sys.argv[0]))
+    output_file.write(output_text)
 
-  if txt_changed:
-    with codecs.open(options.output, "w", encoding="utf-8") as output_file:
-      output_file.write(output_text)
 
 if __name__ == "__main__":
   main(sys.argv[1:])
