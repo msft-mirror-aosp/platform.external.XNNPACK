@@ -13,26 +13,26 @@
 #include <gtest/gtest.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
+
 #include <xnnpack/requantization-stubs.h>
 #include "requantization-tester.h"
 
 
 /*
- * Round-to-nearest, ties away from zero, scalar implementation using unsigned 32-bit arithmetics.
+ * Precise scalar implementation using unsigned 32-bit arithmetics.
  */
 
-TEST(QU8_RNDNA__SCALAR_UNSIGNED32, exact_divide_by_po2) {
+TEST(QU8_PRECISE__SCALAR_UNSIGNED32, exact_divide_by_po2) {
   for (uint32_t s = 1; s < 32; s++) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
       .s(s)
-      .TestExactDivideByPO2(xnn_qu8_requantize_rndna__scalar_unsigned32);
+      .TestExactDivideByPO2(xnn_qu8_requantize_precise__scalar_unsigned32);
   }
 }
 
-TEST(QU8_RNDNA__SCALAR_UNSIGNED32, exact_divide_by_po2_with_zero_point) {
+TEST(QU8_PRECISE__SCALAR_UNSIGNED32, exact_divide_by_po2_with_zero_point) {
   for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
@@ -40,12 +40,12 @@ TEST(QU8_RNDNA__SCALAR_UNSIGNED32, exact_divide_by_po2_with_zero_point) {
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestExactDivideByPO2(xnn_qu8_requantize_rndna__scalar_unsigned32);
+        .TestExactDivideByPO2(xnn_qu8_requantize_precise__scalar_unsigned32);
     }
   }
 }
 
-TEST(QU8_RNDNA__SCALAR_UNSIGNED32, divide_by_po2_with_rounding_up) {
+TEST(QU8_PRECISE__SCALAR_UNSIGNED32, divide_by_po2_with_rounding_up) {
   for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
@@ -53,12 +53,12 @@ TEST(QU8_RNDNA__SCALAR_UNSIGNED32, divide_by_po2_with_rounding_up) {
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_rndna__scalar_unsigned32);
+        .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_precise__scalar_unsigned32);
     }
   }
 }
 
-TEST(QU8_RNDNA__SCALAR_UNSIGNED32, divide_by_po2_with_rounding_down) {
+TEST(QU8_PRECISE__SCALAR_UNSIGNED32, divide_by_po2_with_rounding_down) {
   for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
@@ -66,12 +66,12 @@ TEST(QU8_RNDNA__SCALAR_UNSIGNED32, divide_by_po2_with_rounding_down) {
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestDivideByPO2WithRoundingDown(xnn_qu8_requantize_rndna__scalar_unsigned32);
+        .TestDivideByPO2WithRoundingDown(xnn_qu8_requantize_precise__scalar_unsigned32);
     }
   }
 }
 
-TEST(QU8_RNDNA__SCALAR_UNSIGNED32, divide_by_po2_with_rounding_away) {
+TEST(QU8_PRECISE__SCALAR_UNSIGNED32, divide_by_po2_with_rounding_away) {
   for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
@@ -79,43 +79,43 @@ TEST(QU8_RNDNA__SCALAR_UNSIGNED32, divide_by_po2_with_rounding_away) {
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestDivideByPO2WithRoundingTiesAway(xnn_qu8_requantize_rndna__scalar_unsigned32);
+        .TestDivideByPO2WithRoundingAway(xnn_qu8_requantize_precise__scalar_unsigned32);
     }
   }
 }
 
-TEST(QU8_RNDNA__SCALAR_UNSIGNED32, special_cases) {
+TEST(QU8_PRECISE__SCALAR_UNSIGNED32, special_cases) {
   RequantizationTester()
     .qmin(std::numeric_limits<uint8_t>::min())
     .qmax(std::numeric_limits<uint8_t>::max())
-    .TestSpecialCases(xnn_qu8_requantize_rndna__scalar_unsigned32);
+    .TestSpecialCases(xnn_qu8_requantize_precise__scalar_unsigned32);
 }
 
-TEST(QU8_RNDNA__SCALAR_UNSIGNED32, random_cases) {
+TEST(QU8_PRECISE__SCALAR_UNSIGNED32, random_cases) {
   RequantizationTester()
     .qmin(std::numeric_limits<uint8_t>::min())
     .qmax(std::numeric_limits<uint8_t>::max())
     .zero_point(128)
     .iterations(100)
-    .TestRandomCasesRoundToNearestTiesAway(xnn_qu8_requantize_rndna__scalar_unsigned32);
+    .TestRandomCasesPrecise(xnn_qu8_requantize_precise__scalar_unsigned32);
 }
 
 
 /*
- * Round-to-nearest, ties away from zero, scalar implementation using unsigned 64-bit arithmetics.
+ * Precise scalar implementation using unsigned 64-bit arithmetics.
  */
 
-TEST(QU8_RNDNA__SCALAR_UNSIGNED64, exact_divide_by_po2) {
+TEST(QU8_PRECISE__SCALAR_UNSIGNED64, exact_divide_by_po2) {
   for (uint32_t s = 1; s < 32; s++) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
       .s(s)
-      .TestExactDivideByPO2(xnn_qu8_requantize_rndna__scalar_unsigned64);
+      .TestExactDivideByPO2(xnn_qu8_requantize_precise__scalar_unsigned64);
   }
 }
 
-TEST(QU8_RNDNA__SCALAR_UNSIGNED64, exact_divide_by_po2_with_zero_point) {
+TEST(QU8_PRECISE__SCALAR_UNSIGNED64, exact_divide_by_po2_with_zero_point) {
   for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
@@ -123,12 +123,12 @@ TEST(QU8_RNDNA__SCALAR_UNSIGNED64, exact_divide_by_po2_with_zero_point) {
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestExactDivideByPO2(xnn_qu8_requantize_rndna__scalar_unsigned64);
+        .TestExactDivideByPO2(xnn_qu8_requantize_precise__scalar_unsigned64);
     }
   }
 }
 
-TEST(QU8_RNDNA__SCALAR_UNSIGNED64, divide_by_po2_with_rounding_up) {
+TEST(QU8_PRECISE__SCALAR_UNSIGNED64, divide_by_po2_with_rounding_up) {
   for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
@@ -136,12 +136,12 @@ TEST(QU8_RNDNA__SCALAR_UNSIGNED64, divide_by_po2_with_rounding_up) {
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_rndna__scalar_unsigned64);
+        .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_precise__scalar_unsigned64);
     }
   }
 }
 
-TEST(QU8_RNDNA__SCALAR_UNSIGNED64, divide_by_po2_with_rounding_down) {
+TEST(QU8_PRECISE__SCALAR_UNSIGNED64, divide_by_po2_with_rounding_down) {
   for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
@@ -149,12 +149,12 @@ TEST(QU8_RNDNA__SCALAR_UNSIGNED64, divide_by_po2_with_rounding_down) {
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestDivideByPO2WithRoundingDown(xnn_qu8_requantize_rndna__scalar_unsigned64);
+        .TestDivideByPO2WithRoundingDown(xnn_qu8_requantize_precise__scalar_unsigned64);
     }
   }
 }
 
-TEST(QU8_RNDNA__SCALAR_UNSIGNED64, divide_by_po2_with_rounding_away) {
+TEST(QU8_PRECISE__SCALAR_UNSIGNED64, divide_by_po2_with_rounding_away) {
   for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
@@ -162,43 +162,43 @@ TEST(QU8_RNDNA__SCALAR_UNSIGNED64, divide_by_po2_with_rounding_away) {
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestDivideByPO2WithRoundingTiesAway(xnn_qu8_requantize_rndna__scalar_unsigned64);
+        .TestDivideByPO2WithRoundingAway(xnn_qu8_requantize_precise__scalar_unsigned64);
     }
   }
 }
 
-TEST(QU8_RNDNA__SCALAR_UNSIGNED64, special_cases) {
+TEST(QU8_PRECISE__SCALAR_UNSIGNED64, special_cases) {
   RequantizationTester()
     .qmin(std::numeric_limits<uint8_t>::min())
     .qmax(std::numeric_limits<uint8_t>::max())
-    .TestSpecialCases(xnn_qu8_requantize_rndna__scalar_unsigned64);
+    .TestSpecialCases(xnn_qu8_requantize_precise__scalar_unsigned64);
 }
 
-TEST(QU8_RNDNA__SCALAR_UNSIGNED64, random_cases) {
+TEST(QU8_PRECISE__SCALAR_UNSIGNED64, random_cases) {
   RequantizationTester()
     .qmin(std::numeric_limits<uint8_t>::min())
     .qmax(std::numeric_limits<uint8_t>::max())
     .zero_point(128)
     .iterations(100)
-    .TestRandomCasesRoundToNearestTiesAway(xnn_qu8_requantize_rndna__scalar_unsigned64);
+    .TestRandomCasesPrecise(xnn_qu8_requantize_precise__scalar_unsigned64);
 }
 
 
 /*
- * Round-to-nearest, ties away from zero, scalar implementation using signed 64-bit arithmetics.
+ * Precise scalar implementation using signed 64-bit arithmetics.
  */
 
-TEST(QU8_RNDNA__SCALAR_SIGNED64, exact_divide_by_po2) {
+TEST(QU8_PRECISE__SCALAR_SIGNED64, exact_divide_by_po2) {
   for (uint32_t s = 1; s < 32; s++) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
       .s(s)
-      .TestExactDivideByPO2(xnn_qu8_requantize_rndna__scalar_signed64);
+      .TestExactDivideByPO2(xnn_qu8_requantize_precise__scalar_signed64);
   }
 }
 
-TEST(QU8_RNDNA__SCALAR_SIGNED64, exact_divide_by_po2_with_zero_point) {
+TEST(QU8_PRECISE__SCALAR_SIGNED64, exact_divide_by_po2_with_zero_point) {
   for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
@@ -206,12 +206,12 @@ TEST(QU8_RNDNA__SCALAR_SIGNED64, exact_divide_by_po2_with_zero_point) {
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestExactDivideByPO2(xnn_qu8_requantize_rndna__scalar_signed64);
+        .TestExactDivideByPO2(xnn_qu8_requantize_precise__scalar_signed64);
     }
   }
 }
 
-TEST(QU8_RNDNA__SCALAR_SIGNED64, divide_by_po2_with_rounding_up) {
+TEST(QU8_PRECISE__SCALAR_SIGNED64, divide_by_po2_with_rounding_up) {
   for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
@@ -219,12 +219,12 @@ TEST(QU8_RNDNA__SCALAR_SIGNED64, divide_by_po2_with_rounding_up) {
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_rndna__scalar_signed64);
+        .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_precise__scalar_signed64);
     }
   }
 }
 
-TEST(QU8_RNDNA__SCALAR_SIGNED64, divide_by_po2_with_rounding_down) {
+TEST(QU8_PRECISE__SCALAR_SIGNED64, divide_by_po2_with_rounding_down) {
   for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
@@ -232,12 +232,12 @@ TEST(QU8_RNDNA__SCALAR_SIGNED64, divide_by_po2_with_rounding_down) {
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestDivideByPO2WithRoundingDown(xnn_qu8_requantize_rndna__scalar_signed64);
+        .TestDivideByPO2WithRoundingDown(xnn_qu8_requantize_precise__scalar_signed64);
     }
   }
 }
 
-TEST(QU8_RNDNA__SCALAR_SIGNED64, divide_by_po2_with_rounding_away) {
+TEST(QU8_PRECISE__SCALAR_SIGNED64, divide_by_po2_with_rounding_away) {
   for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
@@ -245,25 +245,25 @@ TEST(QU8_RNDNA__SCALAR_SIGNED64, divide_by_po2_with_rounding_away) {
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestDivideByPO2WithRoundingTiesAway(xnn_qu8_requantize_rndna__scalar_signed64);
+        .TestDivideByPO2WithRoundingAway(xnn_qu8_requantize_precise__scalar_signed64);
     }
   }
 }
 
-TEST(QU8_RNDNA__SCALAR_SIGNED64, special_cases) {
+TEST(QU8_PRECISE__SCALAR_SIGNED64, special_cases) {
   RequantizationTester()
     .qmin(std::numeric_limits<uint8_t>::min())
     .qmax(std::numeric_limits<uint8_t>::max())
-    .TestSpecialCases(xnn_qu8_requantize_rndna__scalar_signed64);
+    .TestSpecialCases(xnn_qu8_requantize_precise__scalar_signed64);
 }
 
-TEST(QU8_RNDNA__SCALAR_SIGNED64, random_cases) {
+TEST(QU8_PRECISE__SCALAR_SIGNED64, random_cases) {
   RequantizationTester()
     .qmin(std::numeric_limits<uint8_t>::min())
     .qmax(std::numeric_limits<uint8_t>::max())
     .zero_point(128)
     .iterations(100)
-    .TestRandomCasesRoundToNearestTiesAway(xnn_qu8_requantize_rndna__scalar_signed64);
+    .TestRandomCasesPrecise(xnn_qu8_requantize_precise__scalar_signed64);
 }
 
 
@@ -284,30 +284,30 @@ TEST(QU8_FP32__SCALAR_LRINTF, random_cases) {
  * FP32-based scalar implementation using magic trick for FP32->INT32 conversion.
  */
 
-TEST(QU8_FP32__SCALAR_FMAGIC, random_cases) {
+TEST(QU8_FP32__SCALAR_MAGIC, random_cases) {
   RequantizationTester()
     .qmin(std::numeric_limits<uint8_t>::min())
     .qmax(std::numeric_limits<uint8_t>::max())
     .iterations(1000)
-    .TestRandomCasesApproximate(xnn_qu8_requantize_fp32__scalar_fmagic);
+    .TestRandomCasesApproximate(xnn_qu8_requantize_fp32__scalar_magic);
 }
 
 
 /*
- * GEMMLOWP-equivalent scalar implementation.
+ * Q31-based scalar implementation.
  */
 
-TEST(QU8_GEMMLOWP__SCALAR, exact_divide_by_po2) {
+TEST(QU8_Q31__SCALAR, exact_divide_by_po2) {
   for (uint32_t s = 1; s < 32; s++) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
       .s(s)
-      .TestExactDivideByPO2(xnn_qu8_requantize_gemmlowp__scalar);
+      .TestExactDivideByPO2(xnn_qu8_requantize_q31__scalar);
   }
 }
 
-TEST(QU8_GEMMLOWP__SCALAR, exact_divide_by_po2_with_zero_point) {
+TEST(QU8_Q31__SCALAR, exact_divide_by_po2_with_zero_point) {
   for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
@@ -315,12 +315,12 @@ TEST(QU8_GEMMLOWP__SCALAR, exact_divide_by_po2_with_zero_point) {
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestExactDivideByPO2(xnn_qu8_requantize_gemmlowp__scalar);
+        .TestExactDivideByPO2(xnn_qu8_requantize_q31__scalar);
     }
   }
 }
 
-TEST(QU8_GEMMLOWP__SCALAR, divide_by_po2_with_rounding_up) {
+TEST(QU8_Q31__SCALAR, divide_by_po2_with_rounding_up) {
   for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
@@ -328,7 +328,7 @@ TEST(QU8_GEMMLOWP__SCALAR, divide_by_po2_with_rounding_up) {
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_gemmlowp__scalar);
+        .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_q31__scalar);
     }
   }
 }
@@ -336,38 +336,38 @@ TEST(QU8_GEMMLOWP__SCALAR, divide_by_po2_with_rounding_up) {
 /* No rounding down test - it fails because of upward bias in multiplication */
 /* No rounding away test - it fails because of upward bias in multiplication */
 
-TEST(QU8_GEMMLOWP__SCALAR, special_cases) {
+TEST(QU8_Q31__SCALAR, special_cases) {
   RequantizationTester()
     .qmin(std::numeric_limits<uint8_t>::min())
     .qmax(std::numeric_limits<uint8_t>::max())
-    .TestSpecialCases(xnn_qu8_requantize_gemmlowp__scalar);
+    .TestSpecialCases(xnn_qu8_requantize_q31__scalar);
 }
 
-TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
+TEST(QU8_Q31__SCALAR, random_cases) {
   RequantizationTester()
     .qmin(std::numeric_limits<uint8_t>::min())
     .qmax(std::numeric_limits<uint8_t>::max())
     .iterations(100)
-    .TestRandomCasesApproximate(xnn_qu8_requantize_gemmlowp__scalar);
+    .TestRandomCasesApproximate(xnn_qu8_requantize_q31__scalar);
 }
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   /*
-   * Round-to-nearest, ties away from zero, SSE2 implementation using floating-point shuffle.
+   * Precise SSE2 implementation using floating-point shuffle.
    */
 
-  TEST(QU8_RNDNA__SSE2, exact_divide_by_po2) {
+  TEST(QU8_PRECISE__SSE2, exact_divide_by_po2) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestExactDivideByPO2(xnn_qu8_requantize_rndna__sse2);
+        .TestExactDivideByPO2(xnn_qu8_requantize_precise__sse2);
     }
   }
 
-  TEST(QU8_RNDNA__SSE2, exact_divide_by_po2_with_zero_point) {
+  TEST(QU8_PRECISE__SSE2, exact_divide_by_po2_with_zero_point) {
     for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -375,12 +375,12 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestExactDivideByPO2(xnn_qu8_requantize_rndna__sse2);
+          .TestExactDivideByPO2(xnn_qu8_requantize_precise__sse2);
       }
     }
   }
 
-  TEST(QU8_RNDNA__SSE2, divide_by_po2_with_rounding_up) {
+  TEST(QU8_PRECISE__SSE2, divide_by_po2_with_rounding_up) {
     for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -388,12 +388,12 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_rndna__sse2);
+          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_precise__sse2);
       }
     }
   }
 
-  TEST(QU8_RNDNA__SSE2, divide_by_po2_with_rounding_down) {
+  TEST(QU8_PRECISE__SSE2, divide_by_po2_with_rounding_down) {
     for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -401,12 +401,12 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingDown(xnn_qu8_requantize_rndna__sse2);
+          .TestDivideByPO2WithRoundingDown(xnn_qu8_requantize_precise__sse2);
       }
     }
   }
 
-  TEST(QU8_RNDNA__SSE2, divide_by_po2_with_rounding_away) {
+  TEST(QU8_PRECISE__SSE2, divide_by_po2_with_rounding_away) {
     for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -414,45 +414,43 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingTiesAway(xnn_qu8_requantize_rndna__sse2);
+          .TestDivideByPO2WithRoundingAway(xnn_qu8_requantize_precise__sse2);
       }
     }
   }
 
-  TEST(QU8_RNDNA__SSE2, special_cases) {
+  TEST(QU8_PRECISE__SSE2, special_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .TestSpecialCases(xnn_qu8_requantize_rndna__sse2);
+      .TestSpecialCases(xnn_qu8_requantize_precise__sse2);
   }
 
-  TEST(QU8_RNDNA__SSE2, random_cases) {
+  TEST(QU8_PRECISE__SSE2, random_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
       .zero_point(128)
       .iterations(100)
-      .TestRandomCasesRoundToNearestTiesAway(xnn_qu8_requantize_rndna__sse2);
+      .TestRandomCasesPrecise(xnn_qu8_requantize_precise__sse2);
   }
 
 
   /*
-   * Round-to-nearest, ties away from zero, SSSE3 implementation using floating-point shuffle.
+   * Precise SSSE3 implementation using floating-point shuffle.
    */
 
-  TEST(QU8_RNDNA__SSSE3, exact_divide_by_po2) {
-    TEST_REQUIRES_X86_SSSE3;
+  TEST(QU8_PRECISE__SSSE3, exact_divide_by_po2) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestExactDivideByPO2(xnn_qu8_requantize_rndna__ssse3);
+        .TestExactDivideByPO2(xnn_qu8_requantize_precise__ssse3);
     }
   }
 
-  TEST(QU8_RNDNA__SSSE3, exact_divide_by_po2_with_zero_point) {
-    TEST_REQUIRES_X86_SSSE3;
+  TEST(QU8_PRECISE__SSSE3, exact_divide_by_po2_with_zero_point) {
     for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -460,13 +458,12 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestExactDivideByPO2(xnn_qu8_requantize_rndna__ssse3);
+          .TestExactDivideByPO2(xnn_qu8_requantize_precise__ssse3);
       }
     }
   }
 
-  TEST(QU8_RNDNA__SSSE3, divide_by_po2_with_rounding_up) {
-    TEST_REQUIRES_X86_SSSE3;
+  TEST(QU8_PRECISE__SSSE3, divide_by_po2_with_rounding_up) {
     for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -474,13 +471,12 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_rndna__ssse3);
+          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_precise__ssse3);
       }
     }
   }
 
-  TEST(QU8_RNDNA__SSSE3, divide_by_po2_with_rounding_down) {
-    TEST_REQUIRES_X86_SSSE3;
+  TEST(QU8_PRECISE__SSSE3, divide_by_po2_with_rounding_down) {
     for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -488,13 +484,12 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingDown(xnn_qu8_requantize_rndna__ssse3);
+          .TestDivideByPO2WithRoundingDown(xnn_qu8_requantize_precise__ssse3);
       }
     }
   }
 
-  TEST(QU8_RNDNA__SSSE3, divide_by_po2_with_rounding_away) {
-    TEST_REQUIRES_X86_SSSE3;
+  TEST(QU8_PRECISE__SSSE3, divide_by_po2_with_rounding_away) {
     for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -502,47 +497,43 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingTiesAway(xnn_qu8_requantize_rndna__ssse3);
+          .TestDivideByPO2WithRoundingAway(xnn_qu8_requantize_precise__ssse3);
       }
     }
   }
 
-  TEST(QU8_RNDNA__SSSE3, special_cases) {
-    TEST_REQUIRES_X86_SSSE3;
+  TEST(QU8_PRECISE__SSSE3, special_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .TestSpecialCases(xnn_qu8_requantize_rndna__ssse3);
+      .TestSpecialCases(xnn_qu8_requantize_precise__ssse3);
   }
 
-  TEST(QU8_RNDNA__SSSE3, random_cases) {
-    TEST_REQUIRES_X86_SSSE3;
+  TEST(QU8_PRECISE__SSSE3, random_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
       .zero_point(128)
       .iterations(100)
-      .TestRandomCasesRoundToNearestTiesAway(xnn_qu8_requantize_rndna__ssse3);
+      .TestRandomCasesPrecise(xnn_qu8_requantize_precise__ssse3);
   }
 
 
   /*
-   * Round-to-nearest, ties away from zero, SSE4.1 implementation using static blend instruction.
+   * Precise SSE4.1 implementation using static blend instruction.
    */
 
-  TEST(QU8_RNDNA__SSE4, exact_divide_by_po2) {
-    TEST_REQUIRES_X86_SSE41;
+  TEST(QU8_PRECISE__SSE4, exact_divide_by_po2) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestExactDivideByPO2(xnn_qu8_requantize_rndna__sse4);
+        .TestExactDivideByPO2(xnn_qu8_requantize_precise__sse4);
     }
   }
 
-  TEST(QU8_RNDNA__SSE4, exact_divide_by_po2_with_zero_point) {
-    TEST_REQUIRES_X86_SSE41;
+  TEST(QU8_PRECISE__SSE4, exact_divide_by_po2_with_zero_point) {
     for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -550,13 +541,12 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestExactDivideByPO2(xnn_qu8_requantize_rndna__sse4);
+          .TestExactDivideByPO2(xnn_qu8_requantize_precise__sse4);
       }
     }
   }
 
-  TEST(QU8_RNDNA__SSE4, divide_by_po2_with_rounding_up) {
-    TEST_REQUIRES_X86_SSE41;
+  TEST(QU8_PRECISE__SSE4, divide_by_po2_with_rounding_up) {
     for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -564,13 +554,12 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_rndna__sse4);
+          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_precise__sse4);
       }
     }
   }
 
-  TEST(QU8_RNDNA__SSE4, divide_by_po2_with_rounding_down) {
-    TEST_REQUIRES_X86_SSE41;
+  TEST(QU8_PRECISE__SSE4, divide_by_po2_with_rounding_down) {
     for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -578,13 +567,12 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingDown(xnn_qu8_requantize_rndna__sse4);
+          .TestDivideByPO2WithRoundingDown(xnn_qu8_requantize_precise__sse4);
       }
     }
   }
 
-  TEST(QU8_RNDNA__SSE4, divide_by_po2_with_rounding_away) {
-    TEST_REQUIRES_X86_SSE41;
+  TEST(QU8_PRECISE__SSE4, divide_by_po2_with_rounding_away) {
     for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -592,27 +580,25 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingTiesAway(xnn_qu8_requantize_rndna__sse4);
+          .TestDivideByPO2WithRoundingAway(xnn_qu8_requantize_precise__sse4);
       }
     }
   }
 
-  TEST(QU8_RNDNA__SSE4, special_cases) {
-    TEST_REQUIRES_X86_SSE41;
+  TEST(QU8_PRECISE__SSE4, special_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .TestSpecialCases(xnn_qu8_requantize_rndna__sse4);
+      .TestSpecialCases(xnn_qu8_requantize_precise__sse4);
   }
 
-  TEST(QU8_RNDNA__SSE4, random_cases) {
-    TEST_REQUIRES_X86_SSE41;
+  TEST(QU8_PRECISE__SSE4, random_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
       .zero_point(128)
       .iterations(100)
-      .TestRandomCasesRoundToNearestTiesAway(xnn_qu8_requantize_rndna__sse4);
+      .TestRandomCasesPrecise(xnn_qu8_requantize_precise__sse4);
   }
 
 
@@ -630,20 +616,20 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
 
 
   /*
-   * GEMMLOWP-equivalent x86 SSE2 implementation.
+   * Q31-based x86 SSE2 implementation.
    */
 
-  TEST(QU8_GEMMLOWP__SSE2, exact_divide_by_po2) {
+  TEST(QU8_Q31__SSE2, exact_divide_by_po2) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestExactDivideByPO2(xnn_qu8_requantize_gemmlowp__sse2);
+        .TestExactDivideByPO2(xnn_qu8_requantize_q31__sse2);
     }
   }
 
-  TEST(QU8_GEMMLOWP__SSE2, exact_divide_by_po2_with_zero_point) {
+  TEST(QU8_Q31__SSE2, exact_divide_by_po2_with_zero_point) {
     for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -651,12 +637,12 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestExactDivideByPO2(xnn_qu8_requantize_gemmlowp__sse2);
+          .TestExactDivideByPO2(xnn_qu8_requantize_q31__sse2);
       }
     }
   }
 
-  TEST(QU8_GEMMLOWP__SSE2, divide_by_po2_with_rounding_up) {
+  TEST(QU8_Q31__SSE2, divide_by_po2_with_rounding_up) {
     for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -664,7 +650,7 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_gemmlowp__sse2);
+          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_q31__sse2);
       }
     }
   }
@@ -672,39 +658,37 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
   /* No rounding down test - it fails because of upward bias in multiplication */
   /* No rounding away test - it fails because of upward bias in multiplication */
 
-  TEST(QU8_GEMMLOWP__SSE2, special_cases) {
+  TEST(QU8_Q31__SSE2, special_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .TestSpecialCases(xnn_qu8_requantize_gemmlowp__sse2);
+      .TestSpecialCases(xnn_qu8_requantize_q31__sse2);
   }
 
-  TEST(QU8_GEMMLOWP__SSE2, random_cases) {
+  TEST(QU8_Q31__SSE2, random_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
       .iterations(100)
-      .TestRandomCasesApproximate(xnn_qu8_requantize_gemmlowp__sse2);
+      .TestRandomCasesApproximate(xnn_qu8_requantize_q31__sse2);
   }
 
 
   /*
-   * GEMMLOWP-equivalent x86 SSSE3 implementation.
+   * Q31-based x86 SSSE3 implementation.
    */
 
-  TEST(QU8_GEMMLOWP__SSSE3, exact_divide_by_po2) {
-    TEST_REQUIRES_X86_SSSE3;
+  TEST(QU8_Q31__SSSE3, exact_divide_by_po2) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestExactDivideByPO2(xnn_qu8_requantize_gemmlowp__ssse3);
+        .TestExactDivideByPO2(xnn_qu8_requantize_q31__ssse3);
     }
   }
 
-  TEST(QU8_GEMMLOWP__SSSE3, exact_divide_by_po2_with_zero_point) {
-    TEST_REQUIRES_X86_SSSE3;
+  TEST(QU8_Q31__SSSE3, exact_divide_by_po2_with_zero_point) {
     for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -712,13 +696,12 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestExactDivideByPO2(xnn_qu8_requantize_gemmlowp__ssse3);
+          .TestExactDivideByPO2(xnn_qu8_requantize_q31__ssse3);
       }
     }
   }
 
-  TEST(QU8_GEMMLOWP__SSSE3, divide_by_po2_with_rounding_up) {
-    TEST_REQUIRES_X86_SSSE3;
+  TEST(QU8_Q31__SSSE3, divide_by_po2_with_rounding_up) {
     for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -726,7 +709,7 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_gemmlowp__ssse3);
+          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_q31__ssse3);
       }
     }
   }
@@ -734,41 +717,37 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
   /* No rounding down test - it fails because of upward bias in multiplication */
   /* No rounding away test - it fails because of upward bias in multiplication */
 
-  TEST(QU8_GEMMLOWP__SSSE3, special_cases) {
-    TEST_REQUIRES_X86_SSSE3;
+  TEST(QU8_Q31__SSSE3, special_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .TestSpecialCases(xnn_qu8_requantize_gemmlowp__ssse3);
+      .TestSpecialCases(xnn_qu8_requantize_q31__ssse3);
   }
 
-  TEST(QU8_GEMMLOWP__SSSE3, random_cases) {
-    TEST_REQUIRES_X86_SSSE3;
+  TEST(QU8_Q31__SSSE3, random_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
       .iterations(100)
-      .TestRandomCasesApproximate(xnn_qu8_requantize_gemmlowp__ssse3);
+      .TestRandomCasesApproximate(xnn_qu8_requantize_q31__ssse3);
   }
 
 
   /*
-   * GEMMLOWP-equivalent x86 SSE4 implementation.
+   * Q31-based x86 SSE4 implementation.
    */
 
-  TEST(QU8_GEMMLOWP__SSE4, exact_divide_by_po2) {
-    TEST_REQUIRES_X86_SSE41;
+  TEST(QU8_Q31__SSE4, exact_divide_by_po2) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestExactDivideByPO2(xnn_qu8_requantize_gemmlowp__sse4);
+        .TestExactDivideByPO2(xnn_qu8_requantize_q31__sse4);
     }
   }
 
-  TEST(QU8_GEMMLOWP__SSE4, exact_divide_by_po2_with_zero_point) {
-    TEST_REQUIRES_X86_SSE41;
+  TEST(QU8_Q31__SSE4, exact_divide_by_po2_with_zero_point) {
     for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -776,13 +755,12 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestExactDivideByPO2(xnn_qu8_requantize_gemmlowp__sse4);
+          .TestExactDivideByPO2(xnn_qu8_requantize_q31__sse4);
       }
     }
   }
 
-  TEST(QU8_GEMMLOWP__SSE4, divide_by_po2_with_rounding_up) {
-    TEST_REQUIRES_X86_SSE41;
+  TEST(QU8_Q31__SSE4, divide_by_po2_with_rounding_up) {
     for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -790,7 +768,7 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_gemmlowp__sse4);
+          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_q31__sse4);
       }
     }
   }
@@ -798,42 +776,38 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
   /* No rounding down test - it fails because of upward bias in multiplication */
   /* No rounding away test - it fails because of upward bias in multiplication */
 
-  TEST(QU8_GEMMLOWP__SSE4, special_cases) {
-    TEST_REQUIRES_X86_SSE41;
+  TEST(QU8_Q31__SSE4, special_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .TestSpecialCases(xnn_qu8_requantize_gemmlowp__sse4);
+      .TestSpecialCases(xnn_qu8_requantize_q31__sse4);
   }
 
-  TEST(QU8_GEMMLOWP__SSE4, random_cases) {
-    TEST_REQUIRES_X86_SSE41;
+  TEST(QU8_Q31__SSE4, random_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
       .iterations(100)
-      .TestRandomCasesApproximate(xnn_qu8_requantize_gemmlowp__sse4);
+      .TestRandomCasesApproximate(xnn_qu8_requantize_q31__sse4);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   /*
-   * Round-to-nearest, ties away from zero, ARM NEON implementation.
+   * Precise ARM NEON implementation.
    */
 
-  TEST(QU8_RNDNA__NEON, exact_divide_by_po2) {
-    TEST_REQUIRES_ARM_NEON;
+  TEST(QU8_PRECISE__NEON, exact_divide_by_po2) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestExactDivideByPO2(xnn_qu8_requantize_rndna__neon);
+        .TestExactDivideByPO2(xnn_qu8_requantize_precise__neon);
     }
   }
 
-  TEST(QU8_RNDNA__NEON, exact_divide_by_po2_with_zero_point) {
-    TEST_REQUIRES_ARM_NEON;
+  TEST(QU8_PRECISE__NEON, exact_divide_by_po2_with_zero_point) {
     for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -841,13 +815,12 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestExactDivideByPO2(xnn_qu8_requantize_rndna__neon);
+          .TestExactDivideByPO2(xnn_qu8_requantize_precise__neon);
       }
     }
   }
 
-  TEST(QU8_RNDNA__NEON, divide_by_po2_with_rounding_up) {
-    TEST_REQUIRES_ARM_NEON;
+  TEST(QU8_PRECISE__NEON, divide_by_po2_with_rounding_up) {
     for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -855,13 +828,12 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_rndna__neon);
+          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_precise__neon);
       }
     }
   }
 
-  TEST(QU8_RNDNA__NEON, divide_by_po2_with_rounding_down) {
-    TEST_REQUIRES_ARM_NEON;
+  TEST(QU8_PRECISE__NEON, divide_by_po2_with_rounding_down) {
     for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -869,13 +841,12 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingDown(xnn_qu8_requantize_rndna__neon);
+          .TestDivideByPO2WithRoundingDown(xnn_qu8_requantize_precise__neon);
       }
     }
   }
 
-  TEST(QU8_RNDNA__NEON, divide_by_po2_with_rounding_away) {
-    TEST_REQUIRES_ARM_NEON;
+  TEST(QU8_PRECISE__NEON, divide_by_po2_with_rounding_away) {
     for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -883,27 +854,25 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingTiesAway(xnn_qu8_requantize_rndna__neon);
+          .TestDivideByPO2WithRoundingAway(xnn_qu8_requantize_precise__neon);
       }
     }
   }
 
-  TEST(QU8_RNDNA__NEON, special_cases) {
-    TEST_REQUIRES_ARM_NEON;
+  TEST(QU8_PRECISE__NEON, special_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .TestSpecialCases(xnn_qu8_requantize_rndna__neon);
+      .TestSpecialCases(xnn_qu8_requantize_precise__neon);
   }
 
-  TEST(QU8_RNDNA__NEON, random_cases) {
-    TEST_REQUIRES_ARM_NEON;
+  TEST(QU8_PRECISE__NEON, random_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
       .zero_point(128)
       .iterations(100)
-      .TestRandomCasesRoundToNearestTiesAway(xnn_qu8_requantize_rndna__neon);
+      .TestRandomCasesPrecise(xnn_qu8_requantize_precise__neon);
   }
 
 
@@ -912,7 +881,6 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
    */
 
   TEST(QU8_FP32__NEON, random_cases) {
-    TEST_REQUIRES_ARM_NEON;
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
@@ -922,22 +890,20 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
 
 
   /*
-   * GEMMLOWP-equivalent ARM NEON implementation.
+   * Q31-based ARM NEON implementation.
    */
 
-  TEST(QU8_GEMMLOWP__NEON, exact_divide_by_po2) {
-    TEST_REQUIRES_ARM_NEON;
+  TEST(QU8_Q31__NEON, exact_divide_by_po2) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestExactDivideByPO2(xnn_qu8_requantize_gemmlowp__neon);
+        .TestExactDivideByPO2(xnn_qu8_requantize_q31__neon);
     }
   }
 
-  TEST(QU8_GEMMLOWP__NEON, exact_divide_by_po2_with_zero_point) {
-    TEST_REQUIRES_ARM_NEON;
+  TEST(QU8_Q31__NEON, exact_divide_by_po2_with_zero_point) {
     for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -945,13 +911,12 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestExactDivideByPO2(xnn_qu8_requantize_gemmlowp__neon);
+          .TestExactDivideByPO2(xnn_qu8_requantize_q31__neon);
       }
     }
   }
 
-  TEST(QU8_GEMMLOWP__NEON, divide_by_po2_with_rounding_up) {
-    TEST_REQUIRES_ARM_NEON;
+  TEST(QU8_Q31__NEON, divide_by_po2_with_rounding_up) {
     for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -959,7 +924,7 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_gemmlowp__neon);
+          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_q31__neon);
       }
     }
   }
@@ -967,21 +932,19 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
   /* No rounding down test - it fails because of upward bias in multiplication */
   /* No rounding away test - it fails because of upward bias in multiplication */
 
-  TEST(QU8_GEMMLOWP__NEON, special_cases) {
-    TEST_REQUIRES_ARM_NEON;
+  TEST(QU8_Q31__NEON, special_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .TestSpecialCases(xnn_qu8_requantize_gemmlowp__neon);
+      .TestSpecialCases(xnn_qu8_requantize_q31__neon);
   }
 
-  TEST(QU8_GEMMLOWP__NEON, random_cases) {
-    TEST_REQUIRES_ARM_NEON;
+  TEST(QU8_Q31__NEON, random_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
       .iterations(100)
-      .TestRandomCasesApproximate(xnn_qu8_requantize_gemmlowp__neon);
+      .TestRandomCasesApproximate(xnn_qu8_requantize_q31__neon);
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
@@ -1000,20 +963,20 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
 
 
   /*
-   * GEMMLOWP-equivalent WAsmd SIMD implementation.
+   * Q31-based WAsmd SIMD implementation.
    */
 
-  TEST(QU8_GEMMLOWP__WASMSIMD, exact_divide_by_po2) {
+  TEST(QU8_Q31__WASMSIMD, exact_divide_by_po2) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestExactDivideByPO2(xnn_qu8_requantize_gemmlowp__wasmsimd);
+        .TestExactDivideByPO2(xnn_qu8_requantize_q31__wasmsimd);
     }
   }
 
-  TEST(QU8_GEMMLOWP__WASMSIMD, exact_divide_by_po2_with_zero_point) {
+  TEST(QU8_Q31__WASMSIMD, exact_divide_by_po2_with_zero_point) {
     for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -1021,12 +984,12 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestExactDivideByPO2(xnn_qu8_requantize_gemmlowp__wasmsimd);
+          .TestExactDivideByPO2(xnn_qu8_requantize_q31__wasmsimd);
       }
     }
   }
 
-  TEST(QU8_GEMMLOWP__WASMSIMD, divide_by_po2_with_rounding_up) {
+  TEST(QU8_Q31__WASMSIMD, divide_by_po2_with_rounding_up) {
     for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
@@ -1034,7 +997,7 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_gemmlowp__wasmsimd);
+          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_q31__wasmsimd);
       }
     }
   }
@@ -1042,18 +1005,18 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
   /* No rounding down test - it fails because of upward bias in multiplication */
   /* No rounding away test - it fails because of upward bias in multiplication */
 
-  TEST(QU8_GEMMLOWP__WASMSIMD, special_cases) {
+  TEST(QU8_Q31__WASMSIMD, special_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .TestSpecialCases(xnn_qu8_requantize_gemmlowp__wasmsimd);
+      .TestSpecialCases(xnn_qu8_requantize_q31__wasmsimd);
   }
 
-  TEST(QU8_GEMMLOWP__WASMSIMD, random_cases) {
+  TEST(QU8_Q31__WASMSIMD, random_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
       .iterations(100)
-      .TestRandomCasesApproximate(xnn_qu8_requantize_gemmlowp__wasmsimd);
+      .TestRandomCasesApproximate(xnn_qu8_requantize_q31__wasmsimd);
   }
 #endif  // XNN_ARCH_WASMSIMD

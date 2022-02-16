@@ -31,6 +31,11 @@ static inline bool is_fp16_zero(uint16_t x) {
 
 class SpMMMicrokernelTester {
  public:
+  enum class Variant {
+    Native,
+    Scalar,
+  };
+
   inline SpMMMicrokernelTester& mr(size_t mr) {
     this->mr_ = mr;
     return *this;
@@ -127,7 +132,7 @@ class SpMMMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f32_spmm_minmax_ukernel_function spmm, xnn_init_f32_minmax_params_fn init_params) const {
+  void Test(xnn_f32_spmm_minmax_ukernel_function spmm, Variant variant = Variant::Native) const {
     ASSERT_GE(m(), 1);
     ASSERT_GE(n(), 1);
     ASSERT_GE(k(), 1);
@@ -268,8 +273,15 @@ class SpMMMicrokernelTester {
       }
 
       // Prepare parameters.
-      xnn_f32_minmax_params params;
-      init_params(&params, output_min, output_max);
+      xnn_f32_minmax_params params = { };
+      switch (variant) {
+        case Variant::Native:
+          params = xnn_init_f32_minmax_params(output_min, output_max);
+          break;
+        case Variant::Scalar:
+          params = xnn_init_scalar_f32_minmax_params(output_min, output_max);
+          break;
+      }
 
       spmm(m() * sizeof(float), n(),
         input.data() + first_kk * m(),
@@ -292,7 +304,7 @@ class SpMMMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_spmm_minmax_ukernel_function spmm, xnn_init_f16_scaleminmax_params_fn init_params) const {
+  void Test(xnn_f16_spmm_minmax_ukernel_function spmm) const {
     ASSERT_GE(m(), 1);
     ASSERT_GE(n(), 1);
     ASSERT_GE(k(), 1);
@@ -436,8 +448,9 @@ class SpMMMicrokernelTester {
 
       // Prepare parameters.
       xnn_f16_scaleminmax_params params;
-      init_params(&params,
-        UINT16_C(0x3C00) /* 1.0 */, fp16_ieee_from_fp32_value(output_min), fp16_ieee_from_fp32_value(output_max));
+      params.scale = UINT16_C(0x3C00) /* 1.0 */;
+      params.max = fp16_ieee_from_fp32_value(output_max);
+      params.min = fp16_ieee_from_fp32_value(output_min);
 
       spmm(m() * sizeof(uint16_t), n(),
         input.data() + first_kk * m(),
