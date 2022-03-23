@@ -22,7 +22,7 @@ void xnn_f32_prelu_ukernel__wasmsimd_minmax_1x4(
     size_t input_stride,
     const float*restrict weights,
     float*restrict output,
-    size_t output_stride) XNN_OOB_READS
+    size_t output_stride) XNN_DISABLE_TSAN
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -34,9 +34,8 @@ void xnn_f32_prelu_ukernel__wasmsimd_minmax_1x4(
   const size_t input_increment = input_stride * 1 - channels;
   const size_t output_increment = output_stride * 1 - channels;
 
-  const v128_t vzero = wasm_i32x4_const_splat(0);
+  const v128_t vzero = wasm_f32x4_splat(0.0f);
   do {
-
     const float* w = weights;
     size_t c = channels;
     for (; c >= 4 * sizeof(float); c -= 4 * sizeof(float)) {
