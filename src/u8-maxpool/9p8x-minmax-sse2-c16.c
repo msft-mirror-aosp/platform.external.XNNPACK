@@ -22,7 +22,7 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16(
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_u8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_u8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(output_pixels != 0);
   assert(kernel_elements != 0);
@@ -96,9 +96,8 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16(
 
         const __m128i vmax2345 = _mm_max_epu8(vmax23, vmax45);
         const __m128i vmax01678 = _mm_max_epu8(vmax018, vmax67);
-        __m128i vout = _mm_max_epu8(vmax2345, vmax01678);
-        vout = _mm_max_epu8(vout, voutput_min);
-        vout = _mm_min_epu8(vout, voutput_max);
+        const __m128i vmax = _mm_max_epu8(vmax2345, vmax01678);
+        const __m128i vout = _mm_max_epu8(_mm_min_epu8(vmax, voutput_max), voutput_min);
 
         _mm_storeu_si128((__m128i*) o, vout); o += 16;
       }
@@ -120,9 +119,8 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16(
 
         const __m128i vmax2345 = _mm_max_epu8(vmax23, vmax45);
         const __m128i vmax01678 = _mm_max_epu8(vmax018, vmax67);
-        __m128i vout = _mm_max_epu8(vmax2345, vmax01678);
-        vout = _mm_max_epu8(vout, voutput_min);
-        vout = _mm_min_epu8(vout, voutput_max);
+        const __m128i vmax = _mm_max_epu8(vmax2345, vmax01678);
+        __m128i vout = _mm_max_epu8(_mm_min_epu8(vmax, voutput_max), voutput_min);
 
         if (c & 8) {
           _mm_storel_epi64((__m128i*) o, vout);
@@ -205,9 +203,8 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16(
 
         const __m128i vmax2345 = _mm_max_epu8(vmax23, vmax45);
         const __m128i vmax0167 = _mm_max_epu8(vmax01, vmax67);
-        __m128i vout = _mm_max_epu8(vmax2345, vmax0167);
-        vout = _mm_max_epu8(vout, voutput_min);
-        vout = _mm_min_epu8(vout, voutput_max);
+        const __m128i vmax = _mm_max_epu8(vmax2345, vmax0167);
+        const __m128i vout = _mm_max_epu8(_mm_min_epu8(vmax, voutput_max), voutput_min);
 
         _mm_storeu_si128((__m128i*) o, vout);
         o += 16;
@@ -230,9 +227,8 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16(
 
         const __m128i vmax2345 = _mm_max_epu8(vmax23, vmax45);
         const __m128i vmax0167 = _mm_max_epu8(vmax01, vmax67);
-        __m128i vout = _mm_max_epu8(vmax2345, vmax0167);
-        vout = _mm_max_epu8(vout, voutput_min);
-        vout = _mm_min_epu8(vout, voutput_max);
+        const __m128i vmax = _mm_max_epu8(vmax2345, vmax0167);
+        __m128i vout = _mm_max_epu8(_mm_min_epu8(vmax, voutput_max), voutput_min);
 
         if (c & 8) {
           _mm_storel_epi64((__m128i*) o, vout);
