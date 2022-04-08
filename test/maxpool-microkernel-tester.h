@@ -15,7 +15,6 @@
 #include <cstddef>
 #include <cstdlib>
 #include <functional>
-#include <limits>
 #include <random>
 #include <vector>
 
@@ -161,7 +160,7 @@ class MaxPoolMicrokernelTester {
   void Test(xnn_u8_maxpool_ukernel_function maxpool, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+    auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
 
     std::vector<const uint8_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
@@ -181,14 +180,14 @@ class MaxPoolMicrokernelTester {
       std::shuffle(indirect_input.begin(),
         indirect_input.begin() + (output_pixels() - 1) * step() + pooling_elements(), rng);
 
-      // Prepare parameters.
-      xnn_u8_minmax_params params = { };
+      // Prepare output parameters.
+      xnn_u8_output_params output_params = { };
       switch (variant) {
         case Variant::Native:
-          params = xnn_init_u8_minmax_params(qmin(), qmax());
+          output_params = xnn_init_u8_output_params(qmin(), qmax());
           break;
         case Variant::Scalar:
-          params = xnn_init_scalar_u8_minmax_params(qmin(), qmax());
+          output_params = xnn_init_scalar_u8_output_params(qmin(), qmax());
           break;
       }
 
@@ -210,7 +209,7 @@ class MaxPoolMicrokernelTester {
         indirect_input.data(), input_offset() * sizeof(uint8_t), output.data(),
         (step() - packed_pooling_elements()) * sizeof(void*),
         (output_stride() - channels()) * sizeof(uint8_t),
-        &params);
+        &output_params);
 
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {
@@ -272,14 +271,14 @@ class MaxPoolMicrokernelTester {
       const float output_max = accumulated_max - float(255 - qmax()) / 255.0f * accumulated_range;
 
 
-      // Prepare parameters.
-      xnn_f32_minmax_params params = { };
+      // Prepare output parameters.
+      xnn_f32_output_params output_params = { };
       switch (variant) {
         case Variant::Native:
-          params = xnn_init_f32_minmax_params(output_min, output_max);
+          output_params = xnn_init_f32_output_params(output_min, output_max);
           break;
         case Variant::Scalar:
-          params = xnn_init_scalar_f32_minmax_params(output_min, output_max);
+          output_params = xnn_init_scalar_f32_output_params(output_min, output_max);
           break;
       }
 
@@ -293,7 +292,7 @@ class MaxPoolMicrokernelTester {
         indirect_input.data(), input_offset() * sizeof(float), output.data(),
         (step() - packed_pooling_elements()) * sizeof(void*),
         (output_stride() - channels()) * sizeof(float),
-        &params);
+        &output_params);
 
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {

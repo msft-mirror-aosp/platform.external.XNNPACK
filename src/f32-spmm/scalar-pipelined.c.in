@@ -3,40 +3,37 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$ABC = "0123456789ABCDEFGHIJK"
 #include <assert.h>
 
 #include <xnnpack/math.h>
 #include <xnnpack/spmm.h>
 
 
-void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar_pipelined(
-    size_t mc,
-    size_t nc,
-    const float*restrict input,
+void xnn_f32_spmm_ukernel_${MR}x${NR}__scalar_pipelined(
+    uint32_t m,
+    uint32_t n,
+    const float*restrict a,
     const float*restrict weights,
     const int32_t*restrict widx_dmap,
     const uint32_t*restrict nidx_nnzmap,
-    float*restrict output,
-    size_t output_stride,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    float*restrict c,
+    const union xnn_f32_output_params params[restrict static 1])
 {
-  assert(mc != 0);
-  assert(mc % sizeof(float) == 0);
-  assert(nc != 0);
+  assert(m != 0);
 
   const float vmin = params->scalar.min;
   const float vmax = params->scalar.max;
-  size_t output_decrement = output_stride * nc - ${MR} * sizeof(float);
-  while XNN_LIKELY(mc >= ${MR} * sizeof(float)) {
+  size_t i = m;
+  while XNN_LIKELY(i >= ${MR}) {
     const float*restrict w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
     float vw = *w++;
     intptr_t diff = *dmap++;
     $for M in range(MR):
-      float vi${ABC[M]} = input[${M}];
-    size_t n = nc;
+      float va${ABC[M]} = a[${M}];
+    size_t j = n;
     do {
       uint32_t nnz = *nnzmap++;
       $for M in range(MR):
@@ -45,13 +42,13 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar_pipelined(
       if XNN_LIKELY(nnz != 0) {
         do {
           $for M in range(MR):
-            vacc${ABC[M]} += vi${ABC[M]} * vw;
-          input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+            vacc${ABC[M]} += va${ABC[M]} * vw;
+          a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
 
           diff = *dmap++;
           vw = *w++;
           $for M in range(MR):
-            vi${ABC[M]} = input[${M}];
+            va${ABC[M]} = a[${M}];
         } while (--nnz != 0);
       }
       $for M in range(MR):
@@ -59,29 +56,26 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar_pipelined(
       $for M in range(MR):
         vout${ABC[M]} = math_max_f32(vout${ABC[M]}, vmin);
       $for M in range(MR):
-        output[${M}] = vout${ABC[M]};
-      output = (float*restrict) ((uintptr_t) output + output_stride);
-    } while (--n != 0);
-    output = (float*restrict) ((uintptr_t) output - output_decrement);
-    input += ${MR};
-    mc -= ${MR} * sizeof(float);
+        c[${M}] = vout${ABC[M]};
+      c += m;
+    } while (--j != 0);
+    c -= m * n;
+    c += ${MR};
+    a += ${MR};
+    i -= ${MR};
   }
-  if XNN_UNLIKELY(mc != 0) {
+  if XNN_UNLIKELY(i != 0) {
     $for LOG2M in reversed(range((MR - 1).bit_length())):
       $SUBMR = 1 << LOG2M
-      $if SUBMR * 2 >= MR:
-        output_decrement += ${MR - SUBMR} * sizeof(float);
-      $else:
-        output_decrement += ${SUBMR} * sizeof(float);
-      if (mc & (${SUBMR} * sizeof(float))) {
+      if (i & ${SUBMR}) {
         const float*restrict w = weights;
         const int32_t* dmap = widx_dmap;
         const uint32_t* nnzmap = nidx_nnzmap;
         float vw = *w++;
         intptr_t diff = *dmap++;
         $for M in range(SUBMR):
-          float vi${ABC[M]} = input[${M}];
-        size_t n = nc;
+          float va${ABC[M]} = a[${M}];
+        size_t j = n;
         do {
           uint32_t nnz = *nnzmap++;
           $for M in range(SUBMR):
@@ -90,13 +84,13 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar_pipelined(
           if XNN_LIKELY(nnz != 0) {
             do {
               $for M in range(SUBMR):
-                vacc${ABC[M]} += vi${ABC[M]} * vw;
-              input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+                vacc${ABC[M]} += va${ABC[M]} * vw;
+              a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
 
               diff = *dmap++;
               vw = *w++;
               $for M in range(SUBMR):
-                vi${ABC[M]} = input[${M}];
+                va${ABC[M]} = a[${M}];
             } while (--nnz != 0);
           }
           $for M in range(SUBMR):
@@ -104,11 +98,12 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar_pipelined(
           $for M in range(SUBMR):
             vout${ABC[M]} = math_max_f32(vout${ABC[M]}, vmin);
           $for M in range(SUBMR):
-            output[${M}] = vout${ABC[M]};
-          output = (float*restrict) ((uintptr_t) output + output_stride);
-        } while (--n != 0);
-        output = (float*restrict) ((uintptr_t) output - output_decrement);
-        input += ${SUBMR};
+            c[${M}] = vout${ABC[M]};
+          c += m;
+        } while (--j != 0);
+        c -= m * n;
+        c += ${SUBMR};
+        a += ${SUBMR};
       }
   }
 }

@@ -164,6 +164,36 @@ TEST(${TEST_NAME}, inplace) {
     }
   }
 }
+
+TEST(${TEST_NAME}, qmin) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (size_t rows = 1; rows <= ${ROW_TILE*3}; rows += ${max(1, ROW_TILE-1)}) {
+    for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
+      PReLUMicrokernelTester()
+        .rows(rows)
+        .channels(channels)
+        .qmin(128)
+        .iterations(1)
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+}
+
+TEST(${TEST_NAME}, qmax) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (size_t rows = 1; rows <= ${ROW_TILE*3}; rows += ${max(1, ROW_TILE-1)}) {
+    for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
+      PReLUMicrokernelTester()
+        .rows(rows)
+        .channels(channels)
+        .qmax(128)
+        .iterations(1)
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+}
 """
 
 
@@ -184,9 +214,12 @@ def generate_test_cases(ukernel, row_tile, channel_tile, isa):
   """
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
+  test_args = [ukernel]
+  if not isa or isa == "psimd":
+    test_args.append("PReLUMicrokernelTester::Variant::Scalar")
   return xngen.preprocess(PRELU_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
-      "TEST_ARGS": [ukernel],
+      "TEST_ARGS": test_args,
       "DATATYPE": datatype,
       "ROW_TILE": row_tile,
       "CHANNEL_TILE": channel_tile,

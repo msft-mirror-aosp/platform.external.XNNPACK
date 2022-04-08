@@ -9,13 +9,9 @@
 #include <xnnpack/math.h>
 
 
-$assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
-$KERNEL = "gemminc" if INC else "gemm"
-$SUFFIX = {"LINEAR": "", "RELU": "_relu", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "xnn_f32_default_params", "RELU": "xnn_f32_relu_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
-void xnn_f32_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WASM else "scalar"}(
+void xnn_f32_gemm${"inc" if INC else ""}_ukernel_${MR}x${NR}__${"wasm" if WASM else "scalar"}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -27,7 +23,7 @@ void xnn_f32_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WASM else "scal
     size_t cn_stride,
     $if INC:
       const float*restrict acc,
-    const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_output_params params[restrict static 1])
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -61,9 +57,6 @@ void xnn_f32_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WASM else "scal
         c${M} = c${M-1};
       }
 
-  $if ACTIVATION == "MINMAX":
-    const float vmin = params->scalar.min;
-    const float vmax = params->scalar.max;
   do {
     $if INC:
       $for M in range(MR):
@@ -94,18 +87,15 @@ void xnn_f32_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WASM else "scal
       k -= sizeof(float);
     } while (k != 0);
 
-    $if ACTIVATION == "MINMAX":
-      $for M in range(MR):
-        $for N in range(NR):
-          vacc${M}${N} = ${MAX_F32}(vacc${M}${N}, vmin);
+    const float vmin = params->scalar.min;
+    $for M in range(MR):
+      $for N in range(NR):
+        vacc${M}${N} = ${MAX_F32}(vacc${M}${N}, vmin);
 
-      $for M in range(MR):
-        $for N in range(NR):
-          vacc${M}${N} = ${MIN_F32}(vacc${M}${N}, vmax);
-    $elif ACTIVATION == "RELU":
-      $for M in range(MR):
-        $for N in range(NR):
-          vacc${M}${N} = ${MAX_F32}(vacc${M}${N}, 0.0f);
+    const float vmax = params->scalar.max;
+    $for M in range(MR):
+      $for N in range(NR):
+        vacc${M}${N} = ${MIN_F32}(vacc${M}${N}, vmax);
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(MR)):

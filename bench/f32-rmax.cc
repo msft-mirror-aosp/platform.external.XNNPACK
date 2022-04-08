@@ -19,39 +19,29 @@
 
 static void f32_rmax(
   benchmark::State& state,
-  xnn_f32_rmax_ukernel_function f32_rmax,
-  benchmark::utils::IsaCheckFunction isa_check = nullptr)
+  xnn_f32_rmax_ukernel_function f32_rmax)
 {
-  if (isa_check && !isa_check(state)) {
-    return;
-  }
-
-  const size_t elements = state.range(0);
+  const size_t n = state.range(0);
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), std::ref(rng));
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), rng);
 
-  std::vector<float, AlignedAllocator<float, 64>> x(elements);
+  std::vector<float, AlignedAllocator<float, 64>> x(n);
   std::generate(x.begin(), x.end(), std::ref(f32rng));
 
   float y;
   for (auto _ : state) {
-    f32_rmax(elements * sizeof(float), x.data(), &y);
+    f32_rmax(n * sizeof(float), x.data(), &y);
   }
 
-  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
-  if (cpu_frequency != 0) {
-    state.counters["cpufreq"] = cpu_frequency;
-  }
+    state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
 
-  const size_t elements_per_iteration = elements;
-  state.counters["elements"] =
-    benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration, benchmark::Counter::kIsRate);
+    state.counters["elements"] =
+    benchmark::Counter(uint64_t(state.iterations()) * n, benchmark::Counter::kIsRate);
 
-  const size_t bytes_per_iteration = elements * sizeof(float);
   state.counters["bytes"] =
-    benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
+    benchmark::Counter(uint64_t(state.iterations()) * n * sizeof(float), benchmark::Counter::kIsRate);
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -60,36 +50,23 @@ static void f32_rmax(
     ->Range(1000, 100000000)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_rmax, avx, xnn_f32_rmax_ukernel__avx, benchmark::utils::CheckAVX)
+  BENCHMARK_CAPTURE(f32_rmax, avx, xnn_f32_rmax_ukernel__avx)
     ->RangeMultiplier(10)
     ->Range(1000, 100000000)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_rmax, avx512f, xnn_f32_rmax_ukernel__avx512f, benchmark::utils::CheckAVX512F)
+  BENCHMARK_CAPTURE(f32_rmax, avx512f, xnn_f32_rmax_ukernel__avx512f)
     ->RangeMultiplier(10)
     ->Range(1000, 100000000)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(f32_rmax, neon, xnn_f32_rmax_ukernel__neon, benchmark::utils::CheckNEON)
+  BENCHMARK_CAPTURE(f32_rmax, neon, xnn_f32_rmax_ukernel__neon)
     ->RangeMultiplier(10)
     ->Range(1000, 100000000)
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_WASMSIMD
-  BENCHMARK_CAPTURE(f32_rmax, wasmsimd_arm, xnn_f32_rmax_ukernel__wasmsimd_arm)
-    ->RangeMultiplier(10)
-    ->Range(1000, 100000000)
-    ->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_rmax, wasmsimd_x86, xnn_f32_rmax_ukernel__wasmsimd_x86)
-    ->RangeMultiplier(10)
-    ->Range(1000, 100000000)
-    ->UseRealTime();
-#endif  // XNN_ARCH_WASMSIMD
-
 BENCHMARK_CAPTURE(f32_rmax, scalar, xnn_f32_rmax_ukernel__scalar)
   ->RangeMultiplier(10)
   ->Range(1000, 100000000)

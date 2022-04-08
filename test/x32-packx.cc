@@ -231,102 +231,111 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
-  TEST(X32_PACKX_4X__WASMSIMD, k_eq_4) {
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+  TEST(X32_PACKX_4X__PSIMD, k_eq_4) {
+    TEST_REQUIRES_PSIMD;
     PackMicrokernelTester()
       .mr(4)
       .m(4)
       .k(4)
-      .Test(xnn_x32_packx_ukernel_4x__wasmsimd);
+      .Test(xnn_x32_packx_ukernel_4x__psimd);
   }
 
-  TEST(X32_PACKX_4X__WASMSIMD, k_eq_4_subtile) {
+  TEST(X32_PACKX_4X__PSIMD, k_eq_4_subtile) {
+    TEST_REQUIRES_PSIMD;
     for (size_t m = 1; m <= 4; m++) {
       PackMicrokernelTester()
         .mr(4)
         .m(m)
         .k(4)
-        .Test(xnn_x32_packx_ukernel_4x__wasmsimd);
+        .Test(xnn_x32_packx_ukernel_4x__psimd);
     }
   }
 
-  TEST(X32_PACKX_4X__WASMSIMD, k_lt_4) {
+  TEST(X32_PACKX_4X__PSIMD, k_lt_4) {
+    TEST_REQUIRES_PSIMD;
     for (size_t k = 1; k < 4; k++) {
       PackMicrokernelTester()
         .mr(4)
         .m(4)
         .k(k)
-        .Test(xnn_x32_packx_ukernel_4x__wasmsimd);
+        .Test(xnn_x32_packx_ukernel_4x__psimd);
     }
   }
 
-  TEST(X32_PACKX_4X__WASMSIMD, k_lt_4_subtile) {
+  TEST(X32_PACKX_4X__PSIMD, k_lt_4_subtile) {
+    TEST_REQUIRES_PSIMD;
     for (size_t k = 1; k < 4; k++) {
       for (size_t m = 1; m <= 4; m++) {
         PackMicrokernelTester()
           .mr(4)
           .m(m)
           .k(k)
-          .Test(xnn_x32_packx_ukernel_4x__wasmsimd);
+          .Test(xnn_x32_packx_ukernel_4x__psimd);
       }
     }
   }
 
-  TEST(X32_PACKX_4X__WASMSIMD, k_gt_4) {
+  TEST(X32_PACKX_4X__PSIMD, k_gt_4) {
+    TEST_REQUIRES_PSIMD;
     for (size_t k = 5; k < 8; k++) {
       PackMicrokernelTester()
         .mr(4)
         .m(4)
         .k(k)
-        .Test(xnn_x32_packx_ukernel_4x__wasmsimd);
+        .Test(xnn_x32_packx_ukernel_4x__psimd);
     }
   }
 
-  TEST(X32_PACKX_4X__WASMSIMD, k_gt_4_subtile) {
+  TEST(X32_PACKX_4X__PSIMD, k_gt_4_subtile) {
+    TEST_REQUIRES_PSIMD;
     for (size_t k = 5; k < 8; k++) {
       for (size_t m = 1; m <= 4; m++) {
         PackMicrokernelTester()
           .mr(4)
           .m(m)
           .k(k)
-          .Test(xnn_x32_packx_ukernel_4x__wasmsimd);
+          .Test(xnn_x32_packx_ukernel_4x__psimd);
       }
     }
   }
 
-  TEST(X32_PACKX_4X__WASMSIMD, k_div_4) {
+  TEST(X32_PACKX_4X__PSIMD, k_div_4) {
+    TEST_REQUIRES_PSIMD;
     for (size_t k = 8; k < 40; k += 4) {
       PackMicrokernelTester()
         .mr(4)
         .m(4)
         .k(k)
-        .Test(xnn_x32_packx_ukernel_4x__wasmsimd);
+        .Test(xnn_x32_packx_ukernel_4x__psimd);
     }
   }
 
-  TEST(X32_PACKX_4X__WASMSIMD, k_div_4_subtile) {
+  TEST(X32_PACKX_4X__PSIMD, k_div_4_subtile) {
+    TEST_REQUIRES_PSIMD;
     for (size_t k = 8; k < 40; k += 4) {
       for (size_t m = 1; m <= 4; m++) {
         PackMicrokernelTester()
           .mr(4)
           .m(m)
           .k(k)
-          .Test(xnn_x32_packx_ukernel_4x__wasmsimd);
+          .Test(xnn_x32_packx_ukernel_4x__psimd);
       }
     }
   }
 
-  TEST(X32_PACKX_4X__WASMSIMD, strided_x) {
+  TEST(X32_PACKX_4X__PSIMD, strided_x) {
+    TEST_REQUIRES_PSIMD;
     for (size_t k = 1; k <= 20; k += 5) {
       PackMicrokernelTester()
         .mr(4)
         .m(4)
         .k(k)
         .x_stride(23)
-        .Test(xnn_x32_packx_ukernel_4x__wasmsimd);
+        .Test(xnn_x32_packx_ukernel_4x__psimd);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
 
 
 TEST(X32_PACKX_2X__SCALAR, k_eq_1) {

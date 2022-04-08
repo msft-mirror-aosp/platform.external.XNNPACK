@@ -5,13 +5,13 @@
 
 #include <assert.h>
 
-#include <xnnpack/unpool.h>
+#include <xnnpack/pad.h>
 
 
 void xnn_x32_unpool_ukernel__scalar(
-    size_t kernel_elements,
-    size_t channels,
-    uint32_t fill,
+    size_t p,
+    size_t c,
+    uint32_t f,
     const uint32_t* input,
     const uint32_t* index,
     uint32_t** output)
@@ -20,11 +20,11 @@ void xnn_x32_unpool_ukernel__scalar(
   uint32_t** os = output;
   do {
     uint32_t* o = *os++;
-    size_t c = channels;
+    size_t k = c;
     do {
-      *o++ = fill;
-    } while (--c != 0);
-  } while (--kernel_elements != 0);
+      *o++ = f;
+    } while (--k != 0);
+  } while (--p != 0);
 
   // Copy indexed elements to output.
   size_t offset = 0;
@@ -32,5 +32,5 @@ void xnn_x32_unpool_ukernel__scalar(
     const uint32_t i = *index++;
     *((uint32_t*) ((uintptr_t) output[i] + offset)) = *input++;
     offset += sizeof(uint32_t);
-  } while (--channels != 0);
+  } while (--c != 0);
 }

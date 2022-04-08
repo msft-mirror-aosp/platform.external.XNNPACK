@@ -20,13 +20,16 @@ void xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1(
     float* output,
     uint32_t* index,
     size_t input_increment,
-    size_t output_increment)
+    size_t output_increment,
+    const union xnn_f32_output_params params[restrict static 1])
 {
   assert(output_pixels != 0);
   assert(pooling_elements != 0);
   assert(pooling_elements > 9);
   assert(channels != 0);
 
+  const float voutput_max = params->scalar.max;
+  const float voutput_min = params->scalar.min;
   do {
     {
       float* ab = accumulation_buffer;
@@ -291,7 +294,9 @@ void xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1(
           vidx = vidx0 + 7;
         }
 
-        *o++ = vmax;
+        const float vout = math_max_f32(math_min_f32(vmax, voutput_max), voutput_min);
+
+        *o++ = vout;
         *i++ = vidx;
       } while (--c != 0);
     }

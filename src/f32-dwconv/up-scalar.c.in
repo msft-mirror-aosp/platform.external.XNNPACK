@@ -6,8 +6,7 @@
 $assert CHANNEL_TILE >= 1
 $assert KERNEL_TILE >= 2
 $assert ACCUMULATORS >= 1
-$assert ACTIVATION in ["LINEAR", "MINMAX"]
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$ABC = "0123456789ABCDEF"
 #include <assert.h>
 
 #include <xnnpack/dwconv.h>
@@ -16,9 +15,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
-$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "xnn_f32_default_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
-void xnn_f32_dwconv${SUFFIX}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${"wasm" if WASM else "scalar"}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+void xnn_f32_dwconv_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${"wasm" if WASM else "scalar"}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -26,23 +23,17 @@ void xnn_f32_dwconv${SUFFIX}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${"wasm" 
     float* output,
     size_t input_stride,
     size_t output_increment,
-    size_t input_offset,
-    const float* zero,
-    const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_output_params params[restrict static 1])
 {
   assert(channels != 0);
   assert(output_width != 0);
 
-  $if ACTIVATION == "MINMAX":
-    const float vmin = params->scalar.min;
-    const float vmax = params->scalar.max;
+  const float vmin = params->scalar.min;
+  const float vmax = params->scalar.max;
   do {
     $for K in range(KERNEL_TILE):
       const float* i${K} = input[${K}];
       assert(i${K} != NULL);
-      if XNN_UNPREDICTABLE(i${K} != zero) {
-        i${K} = (const float*) ((uintptr_t) i${K} + input_offset);
-      }
     input = (const float**) ((uintptr_t) input + input_stride);
 
     size_t c = channels;
@@ -77,18 +68,14 @@ void xnn_f32_dwconv${SUFFIX}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${"wasm" 
                   vacc${C}p${A} = vacc${C}p${A} + vacc${C}p${A + ACC_SLICE};
             $ACC_SLICE *= 2
 
-        $if ACTIVATION == "MINMAX":
-          $for C in range(CHANNEL_TILE):
-            float vacc${C} = ${MAX_F32}(vacc${C}p0, vmin);
+        $for C in range(CHANNEL_TILE):
+          float vacc${C} = ${MAX_F32}(vacc${C}p0, vmin);
 
-          $for C in range(CHANNEL_TILE):
-            vacc${C} = ${MIN_F32}(vacc${C}, vmax);
+        $for C in range(CHANNEL_TILE):
+          vacc${C} = ${MIN_F32}(vacc${C}, vmax);
 
-          $for C in range(CHANNEL_TILE):
-            output[${C}] = vacc${C};
-        $else:
-          $for C in range(CHANNEL_TILE):
-            output[${C}] = vacc${C}p0;
+        $for C in range(CHANNEL_TILE):
+          output[${C}] = vacc${C};
         output += ${CHANNEL_TILE};
       }
       for (; c >= 1; c -= 1) {
@@ -111,12 +98,9 @@ void xnn_f32_dwconv${SUFFIX}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${"wasm" 
                 vacc0p${A} = vacc0p${A} + vacc0p${A + ACC_SLICE};
             $ACC_SLICE *= 2
 
-        $if ACTIVATION == "MINMAX":
-          float vacc0 = ${MAX_F32}(vacc0p0, vmin);
-          vacc0 = ${MIN_F32}(vacc0, vmax);
-          *output++ = vacc0;
-        $else:
-          *output++ = vacc0p0;
+        float vacc0 = ${MAX_F32}(vacc0p0, vmin);
+        vacc0 = ${MIN_F32}(vacc0, vmax);
+        *output++ = vacc0;
       }
     $else:
       do {
@@ -139,12 +123,10 @@ void xnn_f32_dwconv${SUFFIX}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${"wasm" 
               vacc0p${A} += vacc0p${A + ACC_STEP};
           $ACC_STEP *= 2
 
-        $if ACTIVATION == "MINMAX":
-          float vacc0 = ${MAX_F32}(vacc0p0, vmin);
-          vacc0 = ${MIN_F32}(vacc0, vmax);
-          *output++ = vacc0;
-        $else:
-          *output++ = vacc0p0;
+        float vacc0 = ${MAX_F32}(vacc0p0, vmin);
+        vacc0 = ${MIN_F32}(vacc0, vmax);
+
+        *output++ = vacc0;
       } while (--c != 0);
 
     output = (float*) ((uintptr_t) output + output_increment);

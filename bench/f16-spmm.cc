@@ -14,7 +14,7 @@
 
 #include <benchmark/benchmark.h>
 #include <fp16/fp16.h>
-#include "bench/spmm.h"
+#include "bench/gemm.h"
 #include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
 #include <xnnpack/common.h>
@@ -24,13 +24,10 @@
 
 
 static void SpMMBenchmark(benchmark::State& state,
-  xnn_f16_spmm_minmax_ukernel_function spmm, uint32_t mr, uint32_t nr, float sparsity)
+  xnn_f16_spmm_ukernel_function spmm, uint32_t mr, uint32_t nr, float sparsity)
 {
   if (!cpuinfo_initialize()) {
     state.SkipWithError("cpuinfo initialization failed");
-    return;
-  }
-  if (!benchmark::utils::CheckNEONFP16ARITH(state)) {
     return;
   }
 
@@ -40,7 +37,7 @@ static void SpMMBenchmark(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
   auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
 
   // if using blocks, generate the reduced matrix first and then extrude along
@@ -132,7 +129,7 @@ static void SpMMBenchmark(benchmark::State& state,
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   std::fill(c.begin(), c.end(), nanf(""));
 
-  xnn_f16_scaleminmax_params params{
+  xnn_f16_output_params output_params{
     0x3C00 /* 1.0 */, 0x7C00 /* inf */, 0xFC00 /* -inf */};
 
   size_t buffer_index = 0;
@@ -146,20 +143,16 @@ static void SpMMBenchmark(benchmark::State& state,
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
-    spmm(mc * sizeof(uint16_t), nc,
+    spmm(mc, nc,
       a.data() + a_offsets[buffer_index],
       w.data() + buffer_index * w_elements,
       dmap.data() + buffer_index * dmap_elements,
       nmap.data() + buffer_index * nmap_elements,
-      c.data() + buffer_index * c_elements, mc * sizeof(uint16_t),
-      &params);
+      c.data() + buffer_index * c_elements,
+      &output_params);
   }
 
-  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
-  if (cpu_frequency != 0) {
-    state.counters["cpufreq"] = cpu_frequency;
-  }
-
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
   state.counters["FLOPS"] = benchmark::Counter(
     uint64_t(state.iterations()) * 2 * mc * num_nonzeroes, benchmark::Counter::kIsRate);
 
@@ -170,38 +163,38 @@ static void SpMMBenchmark(benchmark::State& state,
 
 #if XNN_ARCH_ARM64
   static void spmm80_8x1__neonfp16arith(benchmark::State& state, const char* net) {
-    SpMMBenchmark(state, xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith, 8, 1, 0.8f);
+    SpMMBenchmark(state, xnn_f16_spmm_ukernel_8x1__neonfp16arith, 8, 1, 0.8f);
   }
-  static void spmm80_8x1__neonfp16arith_x2(benchmark::State& state, const char* net) {
-    SpMMBenchmark(state, xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2, 8, 1, 0.8f);
+  static void spmm80_8x1__neonfp16arith_unroll2(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f16_spmm_ukernel_8x1__neonfp16arith_unroll2, 8, 1, 0.8f);
   }
   static void spmm80_16x1__neonfp16arith(benchmark::State& state, const char* net) {
-    SpMMBenchmark(state, xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith, 16, 1, 0.8f);
+    SpMMBenchmark(state, xnn_f16_spmm_ukernel_16x1__neonfp16arith, 16, 1, 0.8f);
   }
-  static void spmm80_16x1__neonfp16arith_x2(benchmark::State& state, const char* net) {
-    SpMMBenchmark(state, xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2, 16, 1, 0.8f);
+  static void spmm80_16x1__neonfp16arith_unroll2(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f16_spmm_ukernel_16x1__neonfp16arith_unroll2, 16, 1, 0.8f);
   }
   static void spmm80_24x1__neonfp16arith(benchmark::State& state, const char* net) {
-    SpMMBenchmark(state, xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith, 24, 1, 0.8f);
+    SpMMBenchmark(state, xnn_f16_spmm_ukernel_24x1__neonfp16arith, 24, 1, 0.8f);
   }
-  static void spmm80_24x1__neonfp16arith_x2(benchmark::State& state, const char* net) {
-    SpMMBenchmark(state, xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2, 24, 1, 0.8f);
+  static void spmm80_24x1__neonfp16arith_unroll2(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f16_spmm_ukernel_24x1__neonfp16arith_unroll2, 24, 1, 0.8f);
   }
   static void spmm80_32x1__neonfp16arith(benchmark::State& state, const char* net) {
-    SpMMBenchmark(state, xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith, 32, 1, 0.8f);
+    SpMMBenchmark(state, xnn_f16_spmm_ukernel_32x1__neonfp16arith, 32, 1, 0.8f);
   }
-  static void spmm80_32x1__neonfp16arith_x2(benchmark::State& state, const char* net) {
-    SpMMBenchmark(state, xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2, 32, 1, 0.8f);
+  static void spmm80_32x1__neonfp16arith_unroll2(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f16_spmm_ukernel_32x1__neonfp16arith_unroll2, 32, 1, 0.8f);
   }
 
-  BENCHMARK_SPMM(spmm80_8x1__neonfp16arith)
-  BENCHMARK_SPMM(spmm80_8x1__neonfp16arith_x2)
-  BENCHMARK_SPMM(spmm80_16x1__neonfp16arith)
-  BENCHMARK_SPMM(spmm80_16x1__neonfp16arith_x2)
-  BENCHMARK_SPMM(spmm80_24x1__neonfp16arith)
-  BENCHMARK_SPMM(spmm80_24x1__neonfp16arith_x2)
-  BENCHMARK_SPMM(spmm80_32x1__neonfp16arith)
-  BENCHMARK_SPMM(spmm80_32x1__neonfp16arith_x2)
+  BENCHMARK_GEMM(spmm80_8x1__neonfp16arith)
+  BENCHMARK_GEMM(spmm80_8x1__neonfp16arith_unroll2)
+  BENCHMARK_GEMM(spmm80_16x1__neonfp16arith)
+  BENCHMARK_GEMM(spmm80_16x1__neonfp16arith_unroll2)
+  BENCHMARK_GEMM(spmm80_24x1__neonfp16arith)
+  BENCHMARK_GEMM(spmm80_24x1__neonfp16arith_unroll2)
+  BENCHMARK_GEMM(spmm80_32x1__neonfp16arith)
+  BENCHMARK_GEMM(spmm80_32x1__neonfp16arith_unroll2)
 #endif  // XNN_ARCH_ARM64
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
