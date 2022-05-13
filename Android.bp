@@ -7955,7 +7955,7 @@ cc_library_static {
     arch: {
         arm: {
             srcs: AARCH32_ASM_MICROKERNEL_SRCS,
-            clang_asflags: [
+            asflags: [
                 "-marm",
                 "-march=armv8.2-a+dotprod",
                 "-mfpu=neon-fp-armv8",
@@ -7963,7 +7963,7 @@ cc_library_static {
         },
         arm64: {
             srcs: AARCH64_ASM_MICROKERNEL_SRCS,
-            clang_asflags: [
+            asflags: [
                 "-march=armv8.2-a+fp16+dotprod",
             ],
         },
