@@ -7590,8 +7590,12 @@ cc_library_static {
         arm64: {
             srcs: ALL_AARCH64_NEON_MICROKERNEL_SRCS,
         },
-        x86: { enabled: false, },
-        x86_64: { enabled: false, },
+        x86: {
+            enabled: false,
+        },
+        x86_64: {
+            enabled: false,
+        },
     },
     header_libs: [
         "fp16_headers",
@@ -7617,8 +7621,12 @@ cc_library_static {
         arm64: {
             srcs: PROD_AARCH64_NEON_MICROKERNEL_SRCS,
         },
-        x86: { enabled: false, },
-        x86_64: { enabled: false, },
+        x86: {
+            enabled: false,
+        },
+        x86_64: {
+            enabled: false,
+        },
     },
     header_libs: [
         "fp16_headers",
@@ -7644,8 +7652,12 @@ cc_library_static {
         arm64: {
             srcs: ALL_NEONFP16_MICROKERNEL_SRCS,
         },
-        x86: { enabled: false, },
-        x86_64: { enabled: false, },
+        x86: {
+            enabled: false,
+        },
+        x86_64: {
+            enabled: false,
+        },
     },
     header_libs: [
         "fp16_headers",
@@ -7671,8 +7683,12 @@ cc_library_static {
         arm64: {
             srcs: PROD_NEONFP16_MICROKERNEL_SRCS,
         },
-        x86: { enabled: false, },
-        x86_64: { enabled: false, },
+        x86: {
+            enabled: false,
+        },
+        x86_64: {
+            enabled: false,
+        },
     },
     header_libs: [
         "fp16_headers",
@@ -7698,8 +7714,12 @@ cc_library_static {
         arm64: {
             srcs: ALL_NEONFMA_MICROKERNEL_SRCS,
         },
-        x86: { enabled: false, },
-        x86_64: { enabled: false, },
+        x86: {
+            enabled: false,
+        },
+        x86_64: {
+            enabled: false,
+        },
     },
     header_libs: [
         "fp16_headers",
@@ -7725,8 +7745,12 @@ cc_library_static {
         arm64: {
             srcs: PROD_NEONFMA_MICROKERNEL_SRCS,
         },
-        x86: { enabled: false, },
-        x86_64: { enabled: false, },
+        x86: {
+            enabled: false,
+        },
+        x86_64: {
+            enabled: false,
+        },
     },
     header_libs: [
         "fp16_headers",
@@ -7752,8 +7776,12 @@ cc_library_static {
         arm64: {
             srcs: ALL_NEONV8_MICROKERNEL_SRCS,
         },
-        x86: { enabled: false, },
-        x86_64: { enabled: false, },
+        x86: {
+            enabled: false,
+        },
+        x86_64: {
+            enabled: false,
+        },
     },
     header_libs: [
         "fp16_headers",
@@ -7779,8 +7807,12 @@ cc_library_static {
         arm64: {
             srcs: PROD_NEONV8_MICROKERNEL_SRCS,
         },
-        x86: { enabled: false, },
-        x86_64: { enabled: false, },
+        x86: {
+            enabled: false,
+        },
+        x86_64: {
+            enabled: false,
+        },
     },
     header_libs: [
         "fp16_headers",
@@ -7795,15 +7827,21 @@ cc_library_static {
     name: "xnnpack_neonfp16arith_bench_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
+        arm: {
+            enabled: false,
+        },
         arm64: {
             srcs: ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS,
             cflags: [
                 "-march=armv8.2-a+fp16",
             ],
         },
-        x86: { enabled: false, },
-        x86_64: { enabled: false, },
+        x86: {
+            enabled: false,
+        },
+        x86_64: {
+            enabled: false,
+        },
     },
     header_libs: [
         "fp16_headers",
@@ -7818,15 +7856,21 @@ cc_library_static {
     name: "xnnpack_neonfp16arith_prod_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
+        arm: {
+            enabled: false,
+        },
         arm64: {
             srcs: PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS,
             cflags: [
                 "-march=armv8.2-a+fp16",
             ],
         },
-        x86: { enabled: false, },
-        x86_64: { enabled: false, },
+        x86: {
+            enabled: false,
+        },
+        x86_64: {
+            enabled: false,
+        },
     },
     header_libs: [
         "fp16_headers",
@@ -7855,8 +7899,12 @@ cc_library_static {
                 "-march=armv8.2-a+dotprod",
             ],
         },
-        x86: { enabled: false, },
-        x86_64: { enabled: false, },
+        x86: {
+            enabled: false,
+        },
+        x86_64: {
+            enabled: false,
+        },
     },
     header_libs: [
         "fp16_headers",
@@ -7885,8 +7933,12 @@ cc_library_static {
                 "-march=armv8.2-a+dotprod",
             ],
         },
-        x86: { enabled: false, },
-        x86_64: { enabled: false, },
+        x86: {
+            enabled: false,
+        },
+        x86_64: {
+            enabled: false,
+        },
     },
     header_libs: [
         "fp16_headers",
@@ -7903,7 +7955,7 @@ cc_library_static {
     arch: {
         arm: {
             srcs: AARCH32_ASM_MICROKERNEL_SRCS,
-            clang_asflags: [
+            asflags: [
                 "-marm",
                 "-march=armv8.2-a+dotprod",
                 "-mfpu=neon-fp-armv8",
@@ -7911,12 +7963,16 @@ cc_library_static {
         },
         arm64: {
             srcs: AARCH64_ASM_MICROKERNEL_SRCS,
-            clang_asflags: [
+            asflags: [
                 "-march=armv8.2-a+fp16+dotprod",
             ],
         },
-        x86: { enabled: false, },
-        x86_64: { enabled: false, },
+        x86: {
+            enabled: false,
+        },
+        x86_64: {
+            enabled: false,
+        },
     },
 }
 
@@ -7924,8 +7980,12 @@ cc_library_static {
     name: "xnnpack_sse2_amalgam_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: [
                 "src/amalgam/sse.c",
@@ -7958,8 +8018,12 @@ cc_library_static {
     name: "xnnpack_sse2_bench_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: ALL_SSE_MICROKERNEL_SRCS + ALL_SSE2_MICROKERNEL_SRCS,
             cflags: [
@@ -7986,8 +8050,12 @@ cc_library_static {
     name: "xnnpack_sse2_prod_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: ALL_SSE_MICROKERNEL_SRCS + ALL_SSE2_MICROKERNEL_SRCS,
             cflags: [
@@ -8014,8 +8082,12 @@ cc_library_static {
     name: "xnnpack_ssse3_amalgam_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: [
                 "src/amalgam/ssse3.c",
@@ -8046,8 +8118,12 @@ cc_library_static {
     name: "xnnpack_ssse3_bench_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: ALL_SSSE3_MICROKERNEL_SRCS,
             cflags: [
@@ -8074,8 +8150,12 @@ cc_library_static {
     name: "xnnpack_ssse3_prod_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: PROD_SSSE3_MICROKERNEL_SRCS,
             cflags: [
@@ -8102,8 +8182,12 @@ cc_library_static {
     name: "xnnpack_sse41_amalgam_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: [
                 "src/amalgam/sse41.c",
@@ -8134,8 +8218,12 @@ cc_library_static {
     name: "xnnpack_sse41_bench_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: ALL_SSE41_MICROKERNEL_SRCS,
             cflags: [
@@ -8162,8 +8250,12 @@ cc_library_static {
     name: "xnnpack_sse41_prod_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: PROD_SSE41_MICROKERNEL_SRCS,
             cflags: [
@@ -8190,8 +8282,12 @@ cc_library_static {
     name: "xnnpack_avx_amalgam_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: [
                 "src/amalgam/avx.c",
@@ -8222,8 +8318,12 @@ cc_library_static {
     name: "xnnpack_avx_bench_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: ALL_AVX_MICROKERNEL_SRCS,
             cflags: [
@@ -8250,8 +8350,12 @@ cc_library_static {
     name: "xnnpack_avx_prod_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: PROD_AVX_MICROKERNEL_SRCS,
             cflags: [
@@ -8278,8 +8382,12 @@ cc_library_static {
     name: "xnnpack_f16c_amalgam_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: [
                 "src/amalgam/f16c.c",
@@ -8310,8 +8418,12 @@ cc_library_static {
     name: "xnnpack_f16c_bench_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: ALL_F16C_MICROKERNEL_SRCS,
             cflags: [
@@ -8338,8 +8450,12 @@ cc_library_static {
     name: "xnnpack_f16c_prod_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: PROD_F16C_MICROKERNEL_SRCS,
             cflags: [
@@ -8366,8 +8482,12 @@ cc_library_static {
     name: "xnnpack_xop_bench_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: ALL_XOP_MICROKERNEL_SRCS,
             cflags: [
@@ -8394,8 +8514,12 @@ cc_library_static {
     name: "xnnpack_xop_prod_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: PROD_XOP_MICROKERNEL_SRCS,
             cflags: [
@@ -8422,8 +8546,12 @@ cc_library_static {
     name: "xnnpack_fma3_amalgam_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: [
                 "src/amalgam/fma3.c",
@@ -8456,8 +8584,12 @@ cc_library_static {
     name: "xnnpack_fma3_bench_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: ALL_FMA3_MICROKERNEL_SRCS,
             cflags: [
@@ -8486,8 +8618,12 @@ cc_library_static {
     name: "xnnpack_fma3_prod_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: PROD_FMA3_MICROKERNEL_SRCS,
             cflags: [
@@ -8516,8 +8652,12 @@ cc_library_static {
     name: "xnnpack_avx2_amalgam_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: [
                 "src/amalgam/avx2.c",
@@ -8552,8 +8692,12 @@ cc_library_static {
     name: "xnnpack_avx2_bench_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: ALL_AVX2_MICROKERNEL_SRCS,
             cflags: [
@@ -8584,8 +8728,12 @@ cc_library_static {
     name: "xnnpack_avx2_prod_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: PROD_AVX2_MICROKERNEL_SRCS,
             cflags: [
@@ -8616,8 +8764,12 @@ cc_library_static {
     name: "xnnpack_avx512skx_amalgam_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: [
                 "src/amalgam/avx512skx.c",
@@ -8656,8 +8808,12 @@ cc_library_static {
     name: "xnnpack_avx512skx_bench_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: ALL_AVX512SKX_MICROKERNEL_SRCS,
             cflags: [
@@ -8692,8 +8848,12 @@ cc_library_static {
     name: "xnnpack_avx512skx_prod_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: PROD_AVX512SKX_MICROKERNEL_SRCS,
             cflags: [
@@ -8728,8 +8888,12 @@ cc_library_static {
     name: "xnnpack_avx512f_amalgam_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: [
                 "src/amalgam/avx512f.c",
@@ -8760,8 +8924,12 @@ cc_library_static {
     name: "xnnpack_avx512f_bench_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: ALL_AVX512F_MICROKERNEL_SRCS,
             cflags: [
@@ -8788,8 +8956,12 @@ cc_library_static {
     name: "xnnpack_avx512f_prod_microkernels",
     defaults: ["xnnpack_internal_default"],
     arch: {
-        arm: { enabled: false, },
-        arm64:  { enabled: false, },
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            enabled: false,
+        },
         x86: {
             srcs: PROD_AVX512F_MICROKERNEL_SRCS,
             cflags: [
@@ -9141,7 +9313,6 @@ cc_library_static {
     ],
 }
 
-
 cc_library_static {
     name: "xnnpack_mobilenet_v3_large_fp32",
     defaults: ["xnnpack_tests_default"],
@@ -9198,7 +9369,7 @@ cc_benchmark {
         "bench/utils.cc",
     ],
     cflags: [
-        "-Wno-unused-result"
+        "-Wno-unused-result",
     ],
     static_libs: [
         "libcpuinfo",
