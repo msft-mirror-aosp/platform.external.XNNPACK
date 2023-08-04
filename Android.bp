@@ -8833,6 +8833,9 @@ cc_library_static {
         arm64: {
             srcs: PROD_SCALAR_AARCH32_MICROKERNEL_SRCS,
         },
+        riscv64: {
+            srcs: PROD_SCALAR_RISCV_MICROKERNEL_SRCS,
+        },
     },
     header_libs: [
         "fp16_headers",
